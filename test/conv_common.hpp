@@ -143,14 +143,14 @@ static inline bool skip_config(miopen::Handle& handle,
     ctx.general_compile_options = "";
     ctx.disable_perfdb_access   = true;
     ctx.SetStream(&handle);
-    problem.conv_problem.SetupFloats(ctx);
+    problem.SetupFloats(ctx);
 
     return ctx.GetStream().GetDeviceName() == "gfx908" && problem.Is2d() && problem.IsFp16() &&
            problem.IsLayoutDefault() && ctx.use_hip_kernels && problem.GetGroupCount() == 1 &&
-           problem.GetBatchSize() == 1 && problem.GetInChannels() == 192 &&
-           problem.GetInHeight() == 28 && problem.GetInWidth() == 28 &&
-           problem.GetOutChannels() == 1 && problem.GetWeightsHeight() == 3 &&
-           problem.GetWeightsWidth() == 3 && problem.GetPadW() == 1 && problem.GetPadH() == 1 &&
+           problem.GetBatchSize_() == 1 && problem.GetInChannels_() == 192 &&
+           problem.GetInHeight_() == 28 && problem.GetInWidth_() == 28 &&
+           problem.GetOutChannels_() == 1 && problem.GetWeightsHeight_() == 3 &&
+           problem.GetWeightsWidth_() == 3 && problem.GetPadW() == 1 && problem.GetPadH() == 1 &&
            problem.GetKernelStrideW() == 1 && problem.GetKernelStrideH() == 1 &&
            problem.GetDilationW() == 1 && problem.GetDilationH() == 1;
 }
@@ -443,6 +443,30 @@ tensor<Tout> ref_conv_fwd(const tensor<T>& input,
         }
     }
     return rout;
+}
+
+template <typename T, typename Tout = T>
+tensor<Tout> ref_conv_bwd(const tensor<T>& input,
+                          const tensor<T>& weights,
+                          const tensor<Tout>& out,
+                          const miopen::ConvolutionDescriptor& filter)
+{
+    auto rin = input;
+    std::fill(rin.begin(), rin.end(), 0);
+    bool gpu_ref_used = gpu_ref_convolution_bwd(rin, weights, out, filter);
+    if(!gpu_ref_used)
+    {
+        MIOPEN_LOG_W("GPU reference skipped");
+        cpu_convolution_backward_data(filter.GetSpatialDimension(),
+                                      rin,
+                                      weights,
+                                      out,
+                                      filter.GetConvPads(),
+                                      filter.GetConvStrides(),
+                                      filter.GetConvDilations(),
+                                      filter.GetGroupCount());
+    }
+    return rin;
 }
 
 // Mainline convolution tests
