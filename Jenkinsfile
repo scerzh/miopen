@@ -581,7 +581,7 @@ pipeline {
                     }
                     steps{
                       buildHipClangJobAndReboot(build_fin: "ON", needs_gpu:false, build_install: "true")
-                  }
+                    }
                 }
                 stage('Perf DB Validity Test') {
                     agent{ label rocmnode("nogpu") }
@@ -632,38 +632,37 @@ pipeline {
                             retry(2)
                         }
                     agent{ label rocmnode("vega20") }
-                        stages{ 
-                            stage('Fp16 Hip all') {
-                                when {
-                                    expression { params.DATATYPE_FP16 }
-                                }
-                                steps {
-                                    buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Fp16_flags, build_install: "true")
-                                }
+                    stages{ 
+                        stage('Fp16 Hip all') {
+                            when {
+                                expression { params.DATATYPE_FP16 }
                             }
-                            stage('Fp32 Hip all') {
-                                when {
-                                    expression { params.DATATYPE_FP32 }
-                                }
-                                steps {
-                                    buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Fp32_flags, build_install: "true")
-                                }
+                            steps {
+                                buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Fp16_flags, build_install: "true")
                             }
-                            stage('Bf16 Hip all') {
-                                when {
-                                    expression { params.DATATYPE_BF16 }
-                                }
-                                steps {
-                                    buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Bf16_flags, build_install: "true")
-                                }
+                        }
+                        stage('Fp32 Hip all') {
+                            when {
+                                expression { params.DATATYPE_FP32 }
                             }
-                            stage('Int8 Hip all') {
-                                when {
-                                    expression { params.DATATYPE_INT8 }
-                                }
-                                steps {
-                                    buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Int8_flags, build_install: "true")
-                                }
+                            steps {
+                                buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Fp32_flags, build_install: "true")
+                            }
+                        }
+                        stage('Bf16 Hip all') {
+                            when {
+                                expression { params.DATATYPE_BF16 }
+                            }
+                            steps {
+                                buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Bf16_flags, build_install: "true")
+                            }
+                        }
+                        stage('Int8 Hip all') {
+                            when {
+                                expression { params.DATATYPE_INT8 }
+                            }
+                            steps {
+                                buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Int8_flags, build_install: "true")
                             }
                         }
                         stage('reboot node') {
@@ -682,38 +681,37 @@ pipeline {
                         retry(2)
                     }
                     agent{ label rocmnode("navi21") }
-                        stages{ 
-                            stage('Fp16 Hip all') {
-                                when {
-                                    expression { params.DATATYPE_FP16 }
-                                }
-                                steps {
-                                    buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Fp16_flags, build_install: "true")
-                                }
+                    stages{ 
+                        stage('Fp16 Hip all') {
+                            when {
+                                expression { params.DATATYPE_FP16 }
                             }
-                            stage('Fp32 Hip all') {
-                                when {
-                                    expression { params.DATATYPE_FP32 }
-                                }
-                                steps {
-                                    buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Fp32_flags, build_install: "true")
-                                }
+                            steps {
+                                buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Fp16_flags, build_install: "true")
                             }
-                            stage('Bf16 Hip all') {
-                                when {
-                                    expression { params.DATATYPE_BF16 }
-                                }
-                                steps {
-                                    buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Bf16_flags, build_install: "true")
-                                }
+                        }
+                        stage('Fp32 Hip all') {
+                            when {
+                                expression { params.DATATYPE_FP32 }
                             }
-                            stage('Int8 Hip all') {
-                                when {
-                                    expression { params.DATATYPE_INT8 }
-                                }
-                                steps {
-                                    buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Int8_flags, build_install: "true")
-                                }
+                            steps {
+                                buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Fp32_flags, build_install: "true")
+                            }
+                        }
+                        stage('Bf16 Hip all') {
+                            when {
+                                expression { params.DATATYPE_BF16 }
+                            }
+                            steps {
+                                buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Bf16_flags, build_install: "true")
+                            }
+                        }
+                        stage('Int8 Hip all') {
+                            when {
+                                expression { params.DATATYPE_INT8 }
+                            }
+                            steps {
+                                buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Int8_flags, build_install: "true")
                             }
                         }
                         stage('reboot node') {
