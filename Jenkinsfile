@@ -622,17 +622,16 @@ pipeline {
                 options {
                     timeout(time: 900, unit: 'MINUTES')
                 }
-                stages{
-                    stage('All Hip Datatypes On Vega20') {
-                        when {
-                            beforeAgent true
-                            expression { params.TARGET_VEGA20 }
-                        }
-                        options {
-                            timeout(time: 600, unit: 'MINUTES')
+                stage('All Hip Datatypes On Vega20') {
+                    when {
+                        beforeAgent true
+                        expression { params.TARGET_VEGA20 }
+                    }
+                    options {
+                        timeout(time: 600, unit: 'MINUTES')
                             retry(2)
                         }
-                        agent{ label rocmnode("vega20") }
+                    agent{ label rocmnode("vega20") }
                         stages{ 
                             stage('Fp16 Hip all') {
                                 when {
@@ -673,15 +672,16 @@ pipeline {
                             }
                         }
                     }
-                    stage('All Hip Datatypes On gfx1030') {
-                        when {
-                            beforeAgent true
-                            expression { params.TARGET_NAVI21 }
-                        }
-                        options {
-                            retry(2)
-                        }
-                        agent{ label rocmnode("navi21") }
+                }
+                stage('All Hip Datatypes On gfx1030') {
+                    when {
+                        beforeAgent true
+                        expression { params.TARGET_NAVI21 }
+                    }
+                    options {
+                        retry(2)
+                    }
+                    agent{ label rocmnode("navi21") }
                         stages{ 
                             stage('Fp16 Hip all') {
                                 when {
@@ -721,48 +721,48 @@ pipeline {
                                  reboot()
                             }
                         }
-                    }                       
-                    stage('All Hip Datatypes On navi31') {
-                        when {
-                            beforeAgent true
-                            expression { params.TARGET_NAVI31 }
+                    }
+                }                       
+                stage('All Hip Datatypes On navi31') {
+                    when {
+                        beforeAgent true
+                        expression { params.TARGET_NAVI31 }
+                    }
+                    options {
+                        retry(2)
+                    }
+                    agent{ label rocmnode("gfx1100") }
+                    stages{ 
+                        stage('Fp16 Hip all') {
+                            when {
+                                expression { params.DATATYPE_FP16 }
+                            }
+                            steps {
+                                buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Fp16_flags, build_install: "true")
+                            }
                         }
-                        options {
-                            retry(2)
+                        stage('Fp32 Hip all') {
+                            when {
+                                expression { params.DATATYPE_FP32 }
+                            }
+                            steps {
+                                buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Fp32_flags, build_install: "true")
+                            }
                         }
-                        agent{ label rocmnode("gfx1100") }
-                        stages{ 
-                            stage('Fp16 Hip all') {
-                                when {
-                                    expression { params.DATATYPE_FP16 }
-                                }
-                                steps {
-                                    buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Fp16_flags, build_install: "true")
-                                }
+                        stage('Bf16 Hip all') {
+                            when {
+                                expression { params.DATATYPE_BF16 }
                             }
-                            stage('Fp32 Hip all') {
-                                when {
-                                    expression { params.DATATYPE_FP32 }
-                                }
-                                steps {
-                                    buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Fp32_flags, build_install: "true")
-                                }
+                            steps {
+                                buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Bf16_flags, build_install: "true")
                             }
-                            stage('Bf16 Hip all') {
-                                when {
-                                    expression { params.DATATYPE_BF16 }
-                                }
-                                steps {
-                                    buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Bf16_flags, build_install: "true")
-                                }
+                        }
+                        stage('Int8 Hip all') {
+                            when {
+                                expression { params.DATATYPE_INT8 }
                             }
-                            stage('Int8 Hip all') {
-                                when {
-                                    expression { params.DATATYPE_INT8 }
-                                }
-                                steps {
-                                    buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Int8_flags, build_install: "true")
-                                }
+                            steps {
+                                buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Int8_flags, build_install: "true")
                             }
                         }
                         stage('reboot node') {
@@ -771,96 +771,96 @@ pipeline {
                             }
                         }                        
                     }
-                    stage('All Hip Datatypes On gfx908') {
-                        when {
-                            beforeAgent true
-                            expression { params.TARGET_GFX908 }
+                }
+                stage('All Hip Datatypes On gfx908') {
+                    when {
+                        beforeAgent true
+                        expression { params.TARGET_GFX908 }
+                    }
+                    options {
+                        retry(2)
+                    }
+                    agent{ label rocmnode("gfx908") }
+                    stages{ 
+                        stage('Fp16 Hip all') {
+                            when {
+                                expression { params.DATATYPE_FP16 }
+                            }
+                            steps {
+                                buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Fp16_flags, build_install: "true")
+                            }
                         }
-                        options {
-                            retry(2)
+                        stage('Fp32 Hip all') {
+                            when {
+                                expression { params.DATATYPE_FP32 }
+                            }
+                            steps {
+                                buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Fp32_flags, build_install: "true")
+                            }
                         }
-                        agent{ label rocmnode("gfx908") }
-                        stages{ 
-                            stage('Fp16 Hip all') {
-                                when {
-                                    expression { params.DATATYPE_FP16 }
-                                }
-                                steps {
-                                    buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Fp16_flags, build_install: "true")
-                                }
+                        stage('Bf16 Hip all') {
+                            when {
+                                expression { params.DATATYPE_BF16 }
                             }
-                            stage('Fp32 Hip all') {
-                                when {
-                                    expression { params.DATATYPE_FP32 }
-                                }
-                                steps {
-                                    buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Fp32_flags, build_install: "true")
-                                }
+                            steps {
+                                buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Bf16_flags, build_install: "true")
                             }
-                            stage('Bf16 Hip all') {
-                                when {
-                                    expression { params.DATATYPE_BF16 }
-                                }
-                                steps {
-                                    buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Bf16_flags, build_install: "true")
-                                }
+                        }
+                        stage('Int8 Hip all') {
+                            when {
+                                expression { params.DATATYPE_INT8 }
                             }
-                            stage('Int8 Hip all') {
-                                when {
-                                    expression { params.DATATYPE_INT8 }
-                                }
-                                steps {
-                                    buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Int8_flags, build_install: "true")
-                                }
+                            steps {
+                                buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Int8_flags, build_install: "true")
                             }
                         }
                         stage('reboot node') {
-                            steps {
+                           steps {
                                 reboot()
                             }
                         }                        
                     }
-                    stage('All Hip Datatypes On gfx90a') {
-                        when {
-                            beforeAgent true
-                            expression { params.TARGET_GFX90A }
+                }
+                stage('All Hip Datatypes On gfx90a') {
+                    when {
+                        beforeAgent true
+                        expression { params.TARGET_GFX90A }
+                    }
+                    options {
+                        retry(2)
+                    }
+                    agent{ label rocmnode("gfx90a") }
+                    stages{ 
+                        stage('Fp16 Hip all') {
+                            when {
+                                expression { params.DATATYPE_FP16 }
+                            }
+                            steps {
+                                buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Fp16_flags, build_install: "true")
+                            }
                         }
-                        options {
-                            retry(2)
+                        stage('Fp32 Hip all') {
+                            when {
+                                expression { params.DATATYPE_FP32 }
+                            }
+                            steps {
+                                buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Fp32_flags, build_install: "true")
+                            }
                         }
-                        agent{ label rocmnode("gfx90a") }
-                        stages{ 
-                            stage('Fp16 Hip all') {
-                                when {
-                                    expression { params.DATATYPE_FP16 }
-                                }
-                                steps {
-                                    buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Fp16_flags, build_install: "true")
-                                }
+                        stage('Bf16 Hip all') {
+                            when {
+                                expression { params.DATATYPE_BF16 }
                             }
-                            stage('Fp32 Hip all') {
-                                when {
-                                    expression { params.DATATYPE_FP32 }
-                                }
-                                steps {
-                                    buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Fp32_flags, build_install: "true")
-                                }
+                            steps {
+                                buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Bf16_flags, build_install: "true")
                             }
-                            stage('Bf16 Hip all') {
-                                when {
-                                    expression { params.DATATYPE_BF16 }
-                                }
-                                steps {
-                                    buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Bf16_flags, build_install: "true")
-                                }
+                        }
+                        stage('Int8 Hip all') {
+                            when {
+                                expression { params.DATATYPE_INT8 }
                             }
-                            stage('Int8 Hip all') {
-                                when {
-                                    expression { params.DATATYPE_INT8 }
-                                }
-                                steps {
-                                    buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Int8_flags, build_install: "true")
-                                }
+                            steps {
+                                buildHipClangJobAndReboot(build_type: 'debug', setup_flags: Full_test + Int8_flags, build_install: "true")
                             }
                         }
                         stage('reboot node') {
