@@ -619,9 +619,6 @@ pipeline {
                 Navi21_build_cmd = "LLVM_PATH=/opt/rocm/llvm CTEST_PARALLEL_LEVEL=2 MIOPEN_CONV_PRECISE_ROCBLAS_TIMING=0 MIOPEN_LOG_LEVEL=5 make -j\$(nproc) check"
             }
             parallel{
-                options {
-                    timeout(time: 900, unit: 'MINUTES')
-                }
                 stage('All Hip Datatypes On Vega20') {
                     when {
                         beforeAgent true
