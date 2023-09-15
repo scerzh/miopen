@@ -302,11 +302,7 @@ def buildHipClangJob(Map conf=[:]){
         return retimage
 }
 
-def reboot(){
-    build job: 'reboot-slaves', propagate: false , parameters: [string(name: 'server', value: "${env.NODE_NAME}"),]
-}
-
-def buildHipClangJobAndReboot(Map conf=[:]){
+def buildHipClangJob(Map conf=[:]){
     try{
         buildHipClangJob(conf)
     }
@@ -314,11 +310,6 @@ def buildHipClangJobAndReboot(Map conf=[:]){
         echo "throwing error exception for the stage"
         echo 'Exception occurred: ' + e.toString()
         throw e
-    }
-    finally{
-        if (conf.get("needs_gpu", true)) {
-            reboot()
-        }
     }
 }
 
@@ -542,7 +533,7 @@ pipeline {
                 stage("HIP Package") {
                     agent{ label rocmnode("nogpu") }
                     steps{
-                        buildHipClangJobAndReboot( package_build: "true", needs_gpu:false)
+                        buildHipClangJob( package_build: "true", needs_gpu:false)
                     }
                 }
             }
@@ -559,7 +550,7 @@ pipeline {
                         build_cmd = "make -j\$(nproc) -k analyze"
                     }
                     steps{
-                        buildHipClangJobAndReboot(setup_cmd: setup_cmd, build_cmd: build_cmd, needs_gpu:false)
+                        buildHipClangJob(setup_cmd: setup_cmd, build_cmd: build_cmd, needs_gpu:false)
                     }
                 }
                 stage('Clang Format') {
@@ -576,7 +567,7 @@ pipeline {
                                 | xargs -n 1 -P 1 -I{} -t sh -c \'clang-format-12 -style=file {} | diff - {}\'"
                     }
                     steps{
-                        buildHipClangJobAndReboot(setup_cmd: "", build_cmd: "", execute_cmd: execute_cmd, needs_gpu:false)
+                        buildHipClangJob(setup_cmd: "", build_cmd: "", execute_cmd: execute_cmd, needs_gpu:false)
                     }
                 }
                 stage('Tuna Fin Build Test') {
@@ -586,7 +577,7 @@ pipeline {
                       build_cmd = "make -j\$(nproc) "
                     }
                     steps{
-                      buildHipClangJobAndReboot(build_fin: "ON", needs_gpu:false, build_install: "true")
+                      buildHipClangJob(build_fin: "ON", needs_gpu:false, build_install: "true")
                   }
                 }
                 stage('Perf DB Validity Test') {
@@ -630,7 +621,7 @@ pipeline {
                     }
                     agent{ label rocmnode("vega || gfx908 || gfx90a") }
                     steps{
-                        buildHipClangJobAndReboot(config_targets: Smoke_targets)
+                        buildHipClangJob(config_targets: Smoke_targets)
                     }
                 }
                 stage('Fp32 Hip Debug AnyGPU') {
@@ -643,7 +634,7 @@ pipeline {
                     }
                     agent{ label rocmnode("vega || gfx908 || gfx90a") }
                     steps{
-                        buildHipClangJobAndReboot(build_type: 'debug', config_targets: Smoke_targets)
+                        buildHipClangJob(build_type: 'debug', config_targets: Smoke_targets)
                     }
                 }
                 stage('Fp32 Hip Debug gfx908') {
@@ -656,7 +647,7 @@ pipeline {
                     }
                     agent{ label rocmnode("gfx908") }
                     steps{
-                        buildHipClangJobAndReboot(build_type: 'debug', config_targets: Smoke_targets)
+                        buildHipClangJob(build_type: 'debug', config_targets: Smoke_targets)
                     }
                 }
                 stage('Fp32 Hip Debug gfx90a') {
@@ -669,7 +660,7 @@ pipeline {
                     }
                     agent{ label rocmnode("gfx90a") }
                     steps{
-                        buildHipClangJobAndReboot(build_type: 'debug', config_targets: Smoke_targets)
+                        buildHipClangJob(build_type: 'debug', config_targets: Smoke_targets)
                     }
                 }
             }
@@ -693,7 +684,7 @@ pipeline {
                         NOCOMGR_build_cmd = "CTEST_PARALLEL_LEVEL=4 MIOPEN_CONV_PRECISE_ROCBLAS_TIMING=0 MIOPEN_LOG_LEVEL=5 make -j\$(nproc) check"
                     }
                     steps{
-                        buildHipClangJobAndReboot( build_type: 'debug', setup_flags: NOCOMGR_flags, build_cmd: NOCOMGR_build_cmd, test_flags: ' --verbose ')
+                        buildHipClangJob( build_type: 'debug', setup_flags: NOCOMGR_flags, build_cmd: NOCOMGR_build_cmd, test_flags: ' --verbose ')
                     }
                 }
                 stage('Fp32 Hip Debug Embedded Vega20') {
@@ -709,7 +700,7 @@ pipeline {
                         Embedded_flags = "-DMIOPEN_EMBED_DB='gfx906_60'"
                     }
                     steps{
-                        buildHipClangJobAndReboot( build_type: 'debug', setup_flags: Embedded_flags, build_env: extra_log_env, test_flags: ' --verbose ')
+                        buildHipClangJob( build_type: 'debug', setup_flags: Embedded_flags, build_env: extra_log_env, test_flags: ' --verbose ')
                     }
                 }
                 stage('Fp32 Hip Static AnyGPU') {
@@ -722,7 +713,7 @@ pipeline {
                     }
                     agent{ label rocmnode("vega || gfx908 || gfx90a") }
                     steps{
-                        buildHipClangJobAndReboot( setup_flags: "-DBUILD_SHARED_LIBS=Off", mlir_build: 'OFF')
+                        buildHipClangJob( setup_flags: "-DBUILD_SHARED_LIBS=Off", mlir_build: 'OFF')
                     }
                 }
                 stage('Fp32 Hip Normal-Find AnyGPU') {
@@ -739,7 +730,7 @@ pipeline {
                         execute_cmd = "MIOPEN_CONV_PRECISE_ROCBLAS_TIMING=0 bin/test_conv2d --disable-verification-cache"
                     }
                     steps{
-                        buildHipClangJobAndReboot(config_targets: config_targets, execute_cmd: execute_cmd, find_mode: "Normal")
+                        buildHipClangJob(config_targets: config_targets, execute_cmd: execute_cmd, find_mode: "Normal")
                     }
                 }
                 stage('Fp32 Hip Fast-Find AnyGPU') {
@@ -756,7 +747,7 @@ pipeline {
                         execute_cmd = "MIOPEN_FIND_MODE=2 CTEST_PARALLEL_LEVEL=4  MIOPEN_CONV_PRECISE_ROCBLAS_TIMING=0 bin/test_conv2d --disable-verification-cache"
                     }
                     steps{
-                        buildHipClangJobAndReboot( config_targets: config_targets, execute_cmd: execute_cmd)
+                        buildHipClangJob( config_targets: config_targets, execute_cmd: execute_cmd)
                     }
                 }
                 stage('Fp32 Hip AnyGPU') {
@@ -769,7 +760,7 @@ pipeline {
                     }
                     agent{ label rocmnode("vega || gfx908 || gfx90a") }
                     steps{
-                        buildHipClangJobAndReboot()
+                        buildHipClangJob()
                     }
                 }
             }
@@ -789,7 +780,7 @@ pipeline {
                     }
                     agent{ label rocmnode("vega20") }
                     steps{
-                        buildHipClangJobAndReboot( setup_flags: Fp16_flags, config_targets: Smoke_targets)
+                        buildHipClangJob( setup_flags: Fp16_flags, config_targets: Smoke_targets)
                     }
                 }
                 stage('Bf16 Hip Vega20') {
@@ -802,7 +793,7 @@ pipeline {
                     }
                     agent{ label rocmnode("vega20") }
                     steps{
-                        buildHipClangJobAndReboot(setup_flags: Bf16_flags, config_targets: Smoke_targets)
+                        buildHipClangJob(setup_flags: Bf16_flags, config_targets: Smoke_targets)
                     }
                 }
                 stage('Fp16 Hip gfx908') {
@@ -815,7 +806,7 @@ pipeline {
                     }
                     agent{ label rocmnode("gfx908") }
                     steps{
-                        buildHipClangJobAndReboot( setup_flags: Fp16_flags, config_targets: Smoke_targets)
+                        buildHipClangJob( setup_flags: Fp16_flags, config_targets: Smoke_targets)
                     }
                 }
                 stage('Bf16 Hip gfx908') {
@@ -828,7 +819,7 @@ pipeline {
                     }
                     agent{ label rocmnode("gfx908") }
                     steps{
-                        buildHipClangJobAndReboot(setup_flags: Bf16_flags, config_targets: Smoke_targets)
+                        buildHipClangJob(setup_flags: Bf16_flags, config_targets: Smoke_targets)
                     }
                 }
                 stage('Fp16 Hip gfx90a') {
@@ -841,7 +832,7 @@ pipeline {
                     }
                     agent{ label rocmnode("gfx90a") }
                     steps{
-                        buildHipClangJobAndReboot( setup_flags: Fp16_flags, config_targets: Smoke_targets)
+                        buildHipClangJob( setup_flags: Fp16_flags, config_targets: Smoke_targets)
                     }
                 }
                 stage('Bf16 Hip gfx90a') {
@@ -854,7 +845,7 @@ pipeline {
                     }
                     agent{ label rocmnode("gfx90a") }
                     steps{
-                        buildHipClangJobAndReboot(setup_flags: Bf16_flags, config_targets: Smoke_targets)
+                        buildHipClangJob(setup_flags: Bf16_flags, config_targets: Smoke_targets)
                     }
                 }
             }
@@ -879,7 +870,7 @@ pipeline {
                     }
                     agent{ label rocmnode("vega20") }
                     steps{
-                        buildHipClangJobAndReboot( setup_flags: Int8_flags + Full_test)
+                        buildHipClangJob( setup_flags: Int8_flags + Full_test)
                     }
                 }
                 stage('Bf16 Hip Install All gfx908') {
@@ -892,7 +883,7 @@ pipeline {
                     }
                     agent{ label rocmnode("gfx908") }
                     steps{
-                        buildHipClangJobAndReboot(setup_flags: Bf16_flags + Full_test, build_install: "true")
+                        buildHipClangJob(setup_flags: Bf16_flags + Full_test, build_install: "true")
                     }
                 }
                 stage('Bf16 Hip Install All gfx90a') {
@@ -905,7 +896,7 @@ pipeline {
                     }
                     agent{ label rocmnode("gfx90a") }
                     steps{
-                        buildHipClangJobAndReboot(setup_flags: Bf16_flags + Full_test, build_install: "true")
+                        buildHipClangJob(setup_flags: Bf16_flags + Full_test, build_install: "true")
                     }
                 }
                 stage('Fp16 Hip All gfx1030') {
@@ -918,7 +909,7 @@ pipeline {
                     }
                     agent{ label rocmnode("navi21") }
                     steps{
-                        buildHipClangJobAndReboot(setup_flags: Full_test + Fp16_flags, build_cmd: Navi21_build_cmd)
+                        buildHipClangJob(setup_flags: Full_test + Fp16_flags, build_cmd: Navi21_build_cmd)
                     }
                 }
                 stage('Fp32 Hip All gfx908') {
@@ -931,7 +922,7 @@ pipeline {
                     }
                     agent{ label rocmnode("gfx908") }
                     steps{
-                        buildHipClangJobAndReboot(setup_flags: Full_test)
+                        buildHipClangJob(setup_flags: Full_test)
                     }
                 }
                 stage('Fp32 Hip All gfx90a') {
@@ -944,7 +935,7 @@ pipeline {
                     }
                     agent{ label rocmnode("gfx90a") }
                     steps{
-                        buildHipClangJobAndReboot(setup_flags: Full_test)
+                        buildHipClangJob(setup_flags: Full_test)
                     }
                 }
                 // stage('Fp32 Hip All gfx90a Xnack+') {
@@ -954,7 +945,7 @@ pipeline {
                 //     }
                 //     agent{ label rocmnode("gfx90a") }
                 //     steps{
-                //         buildHipClangJobAndReboot(setup_flags: Full_test, enforce_xnack_on: true)
+                //         buildHipClangJob(setup_flags: Full_test, enforce_xnack_on: true)
                 //     }
                 // }
                 stage('Fp16 Hip Install All Vega20') {
@@ -967,7 +958,7 @@ pipeline {
                     }
                     agent{ label rocmnode("vega20") }
                     steps{
-                        buildHipClangJobAndReboot( setup_flags: Full_test + Fp16_flags, build_install: "true")
+                        buildHipClangJob( setup_flags: Full_test + Fp16_flags, build_install: "true")
                     }
                 }
                 stage('Fp32 Hip All Vega20') {
@@ -980,7 +971,7 @@ pipeline {
                     }
                     agent{ label rocmnode("vega20") }
                     steps{
-                        buildHipClangJobAndReboot( setup_flags: Full_test)
+                        buildHipClangJob( setup_flags: Full_test)
                     }
                 }
                 stage('Fp32 Hip All Install gfx1030') {
@@ -993,7 +984,7 @@ pipeline {
                     }
                     agent{ label rocmnode("navi21") }
                     steps{
-                        buildHipClangJobAndReboot(setup_flags: Full_test, build_cmd: Navi21_build_cmd, build_install: "true")
+                        buildHipClangJob(setup_flags: Full_test, build_cmd: Navi21_build_cmd, build_install: "true")
                     }
                 }
                 stage('Fp16 Hip All Install gfx908') {
@@ -1006,7 +997,7 @@ pipeline {
                     }
                     agent{ label rocmnode("gfx908") }
                     steps{
-                        buildHipClangJobAndReboot(setup_flags: Full_test + Fp16_flags, build_install: "true")
+                        buildHipClangJob(setup_flags: Full_test + Fp16_flags, build_install: "true")
                     }
                 }
                 stage('Fp16 Hip All Install gfx90a') {
@@ -1019,7 +1010,7 @@ pipeline {
                     }
                     agent{ label rocmnode("gfx90a") }
                     steps{
-                        buildHipClangJobAndReboot(setup_flags: Full_test + Fp16_flags, build_install: "true")
+                        buildHipClangJob(setup_flags: Full_test + Fp16_flags, build_install: "true")
                     }
                 }
             }
