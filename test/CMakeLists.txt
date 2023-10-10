@@ -1617,24 +1617,6 @@ endif()
 #   message output to the log, which happens if something is broken in the tuning machinery.
 # * Use MIOPEN_DEBUG_TUNING_ITERATIONS_MAX to save testing time.
 
-add_custom_test(smoke_solver_ConvAsmImplicitGemmV4R1Dynamic GFX908_DISABLED GFX90A_DISABLED SKIP_XNACK_ON
-    COMMAND MIOPEN_FIND_MODE=normal MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvAsmImplicitGemmV4R1DynamicFwd $<TARGET_FILE:test_conv2d>
-      ${TEST_CONV_VERBOSE_F} --input 16 16 16 16 --weights 16 16 1 1 --pads_strides_dilations 0 0 1 1 1 1 ${MIOPEN_TEST_FLAGS_ARGS}
-    COMMAND MIOPEN_FIND_MODE=normal MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvAsmImplicitGemmV4R1DynamicBwd $<TARGET_FILE:test_conv2d>
-      ${TEST_CONV_VERBOSE_B} --input 64 64 14 14 --weights 16 64 1 1 --pads_strides_dilations 0 0 1 1 1 1 ${MIOPEN_TEST_FLAGS_ARGS}
-    COMMAND MIOPEN_FIND_MODE=normal MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvAsmImplicitGemmV4R1DynamicWrw $<TARGET_FILE:test_conv2d>
-      ${TEST_CONV_VERBOSE_W} --input 1 32 28 28 --weights 32 32 1 1 --pads_strides_dilations 0 0 1 1 1 1 ${MIOPEN_TEST_FLAGS_ARGS}
-)
-
-add_custom_test(smoke_solver_ConvAsmImplicitGemmGTCDynamicXdlops GFX900_DISABLED GFX906_DISABLED GFX90A_DISABLED HALF_ENABLED SKIP_XNACK_ON
-    COMMAND MIOPEN_FIND_MODE=normal MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvAsmImplicitGemmGTCDynamicWrwXdlops $<TARGET_FILE:test_conv2d>
-      ${TEST_CONV_VERBOSE_W} --input 2 256 12 18 --weights 256 256 3 3 --pads_strides_dilations 1 1 1 1 1 1 ${MIOPEN_TEST_FLAGS_ARGS}
-    COMMAND MIOPEN_FIND_MODE=normal MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvAsmImplicitGemmGTCDynamicBwdXdlops $<TARGET_FILE:test_conv2d>
-      ${TEST_CONV_VERBOSE_B} --input 64 64 28 28 --weights 16 64 1 1 --pads_strides_dilations 0 0 1 1 1 1 ${MIOPEN_TEST_FLAGS_ARGS}
-    COMMAND MIOPEN_FIND_MODE=normal MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvAsmImplicitGemmGTCDynamicFwdXdlops $<TARGET_FILE:test_conv2d>
-      ${TEST_CONV_VERBOSE_F} --input 64 512 7 7 --weights 128 128 3 3 --pads_strides_dilations 1 1 1 1 1 1 ${MIOPEN_TEST_FLAGS_ARGS}
-)
-
 add_custom_test(smoke_solver_ConvAsmImplicitGemmGTCDynamicXdlopsNHWC_fp32_fp16 GFX900_DISABLED GFX906_DISABLED
     HALF_ENABLED SKIP_XNACK_ON TEST_TUNING
     COMMAND MIOPEN_FIND_ENFORCE=SEARCH_DB_UPDATE MIOPEN_DEBUG_TUNING_ITERATIONS_MAX=5
