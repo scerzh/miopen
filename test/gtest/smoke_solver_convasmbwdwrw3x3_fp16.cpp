@@ -54,7 +54,7 @@ void GetArgs(const TestCase& param, std::vector<std::string>& tokens)
         tokens.push_back(*begin++);
 }
 
-class Conv2dFloat : public testing::TestWithParam<std::vector<TestCase>>
+class Conv2dHalf : public testing::TestWithParam<std::vector<TestCase>>
 {
 };
 
@@ -64,8 +64,8 @@ void Run2dDriver(miopenDataType_t prec)
     std::vector<TestCase> params;
     switch(prec)
     {
-    case miopenFloat: params = Conv2dFloat::GetParam(); break;
-    case miopenHalf:
+    case miopenHalf: params = Conv2dHalf::GetParam(); break;
+    case miopenFloat: 
     case miopenBFloat16:
     case miopenInt8:
     case miopenInt8x4:
@@ -73,11 +73,11 @@ void Run2dDriver(miopenDataType_t prec)
     case miopenDouble:
     case miopenFloat8:
     case miopenBFloat8:
-        FAIL() << "miopenHalf, miopenBFloat16, miopenInt8, miopenInt8x4, miopenInt32, "
+        FAIL() << "miopenFloat, miopenBFloat16, miopenInt8, miopenInt8x4, miopenInt32, "
                   "miopenDouble, miopenFloat8, miopenBFloat8 "
-                  "data type not supported by smoke_solver_convasmbwdwrw3x3_fp32 test";
+                  "data type not supported by smoke_solver_convasmbwdwrw3x3_fp16 test";
 
-    default: params = Conv2dFloat::GetParam();
+    default: params = Conv2dHalf::GetParam();
     }
 
     for(const auto& test_value : params)
@@ -104,18 +104,18 @@ void Run2dDriver(miopenDataType_t prec)
 bool IsTestSupportedForDevice(const miopen::Handle& handle)
 {
     std::string devName = handle.GetDeviceName();
-    if(devName == "gfx900" || devName == "gfx906" || devName == "gfx908")
+    if(devName == "gfx900" || devName == "gfx906" || devName == "gfx908" || devName == "gfx90a")
         return true;
     else
         return false;
 }
 
-TEST_P(Conv2dFloat, FloatTest)
+TEST_P(Conv2dHalf, HalfTest)
 {
     const auto& handle = get_handle();
     if(IsTestSupportedForDevice(handle) && !SkipTest())
     {
-        Run2dDriver(miopenFloat);
+        Run2dDriver(miopenHalf);
     }
     else
     {
@@ -141,6 +141,6 @@ std::vector<TestCase> GetTestCases(void)
     return test_cases;
 }
 
-INSTANTIATE_TEST_SUITE_P(SmokeSolverConvAsmBwdWrw3x3Fp32,
-                         Conv2dFloat,
+INSTANTIATE_TEST_SUITE_P(SmokeSolverConvAsmBwdWrw3x3Fp16,
+                         Conv2dHalf,
                          testing::Values(GetTestCases()));
