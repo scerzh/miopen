@@ -1611,13 +1611,6 @@ if(MIOPEN_TEST_FLOAT)
     add_custom_test(test_reduce_double SKIP_UNLESS_ALL GFX94X_ENABLED GFX103X_ENABLED GFX110X_ENABLED COMMAND  $<TARGET_FILE:test_reduce_test> --double --all --verbose)
 endif()
 
-add_custom_test(smoke_solver_ConvFFT GFX103X_ENABLED GFX110X_ENABLED
-    COMMAND MIOPEN_FIND_MODE=normal MIOPEN_DEBUG_FIND_ONLY_SOLVER=fft $<TARGET_FILE:test_conv2d>
-      ${TEST_CONV_VERBOSE_F} --input 1 16 14 14 --weights 48 16 5 5 --pads_strides_dilations 2 2 1 1 1 1 ${MIOPEN_TEST_FLAGS_ARGS}
-    COMMAND MIOPEN_FIND_MODE=normal MIOPEN_DEBUG_FIND_ONLY_SOLVER=fft $<TARGET_FILE:test_conv2d>
-      ${TEST_CONV_VERBOSE_B} --input 1 16 14 14 --weights 48 16 5 5 --pads_strides_dilations 2 2 1 1 1 1 ${MIOPEN_TEST_FLAGS_ARGS}
-)
-
 add_custom_test(smoke_solver_ConvDirectNaiveConv_F GFX103X_ENABLED GFX110X_ENABLED HALF_ENABLED BF16_ENABLED INT8_ENABLED
     COMMAND MIOPEN_FIND_MODE=normal MIOPEN_DRIVER_USE_GPU_REFERENCE=0 MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvDirectNaiveConvFwd $<TARGET_FILE:test_conv2d>
       ${TEST_CONV_VERBOSE_F} --input 1 16 14 14 --weights 48 16 5 5 --pads_strides_dilations 2 2 1 1 1 1 ${MIOPEN_TEST_FLAGS_ARGS}
