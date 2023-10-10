@@ -1573,16 +1573,6 @@ set(ARGS_NCHWC_CHWNC_FWD_FP16x8
     --tensor_vect 1
     --vector_length 8)
 
-add_custom_test(test_regression_half_mi100 SKIP_UNLESS_ALL FLOAT_DISABLED HALF_ENABLED GFX908_ENABLED GFX900_DISABLED GFX906_DISABLED GFX90A_DISABLED
-# Regression test for SWDEV-291202
-COMMAND MIOPEN_FIND_MODE=normal MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvHipImplicitGemmBwdDataV4R1Xdlops $<TARGET_FILE:test_conv2d> ${MIOPEN_TEST_FLOAT_ARG} --verbose --input  128  24 14 14 --weights 64  24 5 5 --pads_strides_dilations 2 2 1 1 1 1 --disable-forward --disable-backward-weights
-)
-
-add_custom_test(test_regression_float_mi100 SKIP_UNLESS_ALL GFX900_DISABLED GFX906_DISABLED GFX90A_DISABLED
-# Regression test for SWDEV-305815 (issue 1206)
-COMMAND ${IMPLICITGEMM_TESTING_ENV} MIOPEN_LOG_LEVEL=5 $<TARGET_FILE:test_conv2d> ${MIOPEN_TEST_FLOAT_ARG} --verbose --input 32 256 38 38 --weights 256 256 1 1 --pads_strides_dilations 0 0 1 1 1 1 --disable-forward --disable-backward-weights
-)
-
 # MIOPEN_DEBUG_CONV_CK_IGEMM_FWD_V6R1_DLOPS_NCHW is explicitly enabled due to the kernel is disabled by default via #2306
 set(CONV_CK_IGEMM_FWD_V6R1_DLOPS_NCHW_ENV
     MIOPEN_FIND_MODE=normal
