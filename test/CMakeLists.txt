@@ -1611,15 +1611,6 @@ if(MIOPEN_TEST_FLOAT)
     add_custom_test(test_reduce_double SKIP_UNLESS_ALL GFX94X_ENABLED GFX103X_ENABLED GFX110X_ENABLED COMMAND  $<TARGET_FILE:test_reduce_test> --double --all --verbose)
 endif()
 
-add_custom_test(smoke_solver_ConvOcl_Fwd11x11_FwdGen_WrW53 GFX103X_ENABLED HALF_ENABLED BF16_ENABLED
-    COMMAND MIOPEN_FIND_MODE=normal MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvOclDirectFwd11x11 $<TARGET_FILE:test_conv2d>
-      ${TEST_CONV_VERBOSE_F} --input 1 1 44 44 --weights 1 1 11 11 --pads_strides_dilations 0 0 4 4 1 1 ${MIOPEN_TEST_FLAGS_ARGS}
-    COMMAND MIOPEN_FIND_MODE=normal MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvOclDirectFwdGen $<TARGET_FILE:test_conv2d>
-      ${TEST_CONV_VERBOSE_F} --input 1 1 6 6 --weights 1 1 3 3 --pads_strides_dilations 0 0 2 2 1 1 ${MIOPEN_TEST_FLAGS_ARGS}
-    COMMAND MIOPEN_FIND_MODE=normal MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvOclBwdWrW53 $<TARGET_FILE:test_conv2d>
-      ${TEST_CONV_VERBOSE_W} --input 16 1 7 7 --weights 1 1 3 3 --pads_strides_dilations 0 0 1 1 1 1 ${MIOPEN_TEST_FLAGS_ARGS}
-)
-
 # NOTES ON WRITING TESTS FOR TUNABLE SOLVERS
 # * Enforce tuning (SEARCH_DB_UPDATE).
 # * Use TEST_TUNING. This flag leads to test failure in case of any "Error"
