@@ -54,7 +54,7 @@ void GetArgs(const TestCase& param, std::vector<std::string>& tokens)
         tokens.push_back(*begin++);
 }
 
-class Float : public testing::TestWithParam<std::vector<TestCase>>
+class Conv2dFloat : public testing::TestWithParam<std::vector<TestCase>>
 {
 };
 
@@ -64,7 +64,7 @@ void Run2dDriver(miopenDataType_t prec)
     std::vector<TestCase> params;
     switch(prec)
     {
-    case miopenFloat: params = Float::GetParam(); break;
+    case miopenFloat: params = Conv2dFloat::GetParam(); break;
     case miopenHalf:
     case miopenInt8:
     case miopenBFloat16:
@@ -77,7 +77,7 @@ void Run2dDriver(miopenDataType_t prec)
                   "miopenDouble, miopenFloat8, miopenBFloat8 "
                   "data type not supported by conv_igemm_dynamic_xdlops_nhwc_nchw test";
 
-    default: params = Float::GetParam();
+    default: params = Conv2dFloat::GetParam();
     }
 
     for(const auto& test_value : params)
@@ -107,7 +107,7 @@ bool IsTestSupportedForDevice(const miopen::Handle& handle)
         return false;
 }
 
-TEST_P(Float, FloatTest)
+TEST_P(Conv2dFloat, FloatTest)
 {
     const auto& handle = get_handle();
     if(IsTestSupportedForDevice(handle) && !SkipTest())
@@ -142,4 +142,4 @@ std::vector<TestCase> GetTestCases(const std::string& precision)
     return test_cases;
 }
 
-INSTANTIATE_TEST_SUITE_P(RegressionMi100, Float, testing::Values(GetTestCases("--float")));
+INSTANTIATE_TEST_SUITE_P(RegressionMi100, Conv2dFloat, testing::Values(GetTestCases("--float")));

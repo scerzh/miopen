@@ -54,7 +54,7 @@ void GetArgs(const TestCase& param, std::vector<std::string>& tokens)
         tokens.push_back(*begin++);
 }
 
-class Half : public testing::TestWithParam<std::vector<TestCase>>
+class Conv2dHalf : public testing::TestWithParam<std::vector<TestCase>>
 {
 };
 
@@ -64,7 +64,7 @@ void Run2dDriver(miopenDataType_t prec)
     std::vector<TestCase> params;
     switch(prec)
     {
-    case miopenHalf: params = Half::GetParam(); break;
+    case miopenHalf: params = Conv2dHalf::GetParam(); break;
     case miopenFloat:
     case miopenInt8:
     case miopenBFloat16:
@@ -77,7 +77,7 @@ void Run2dDriver(miopenDataType_t prec)
                   "miopenDouble, miopenFloat8, miopenBFloat8 "
                   "data type not supported by conv_igemm_dynamic_dlops test";
 
-    default: params = Half::GetParam();
+    default: params = Conv2dHalf::GetParam();
     }
 
     for(const auto& test_value : params)
@@ -107,7 +107,7 @@ bool IsTestSupportedForDevice(const miopen::Handle& handle)
         return false;
 }
 
-TEST_P(Half, HalfTest)
+TEST_P(Conv2dHalf, HalfTest)
 {
     const auto& handle = get_handle();
     if(IsTestSupportedForDevice(handle) && !SkipTest())
@@ -139,4 +139,4 @@ std::vector<TestCase> GetTestCases(const std::string& precision)
     return test_cases;
 }
 
-INSTANTIATE_TEST_SUITE_P(RegressionMi100, Half, testing::Values(GetTestCases("--half")));
+INSTANTIATE_TEST_SUITE_P(RegressionMi100, Conv2dHalf, testing::Values(GetTestCases("--half")));
