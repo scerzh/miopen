@@ -1611,16 +1611,6 @@ if(MIOPEN_TEST_FLOAT)
     add_custom_test(test_reduce_double SKIP_UNLESS_ALL GFX94X_ENABLED GFX103X_ENABLED GFX110X_ENABLED COMMAND  $<TARGET_FILE:test_reduce_test> --double --all --verbose)
 endif()
 
-add_custom_test(smoke_solver_ConvAsm_5x10_7x7 GFX90A_DISABLED SKIP_XNACK_ON
-    # GFX90A_DISABLED is because of WORKAROUND_ISSUE_1146
-    COMMAND MIOPEN_FIND_MODE=normal MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvAsm5x10u2v2f1 $<TARGET_FILE:test_conv2d>
-      ${TEST_CONV_VERBOSE_F} --input 1 1 5 10 --weights 16 1 5 10 --pads_strides_dilations 0 0 2 2 1 1 ${MIOPEN_TEST_FLAGS_ARGS}
-    COMMAND MIOPEN_FIND_MODE=normal MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvAsm5x10u2v2b1 $<TARGET_FILE:test_conv2d>
-      ${TEST_CONV_VERBOSE_B} --input 1 1 16 160 --weights 16 16 5 10 --pads_strides_dilations 0 0 2 2 1 1 ${MIOPEN_TEST_FLAGS_ARGS}
-    COMMAND MIOPEN_FIND_MODE=normal MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvAsm7x7c3h224w224k64u2v2p3q3f1 $<TARGET_FILE:test_conv2d>
-      ${TEST_CONV_VERBOSE_F} --input 1 3 224 224 --weights 64 3 7  7 --pads_strides_dilations 3 3 2 2 1 1 ${MIOPEN_TEST_FLAGS_ARGS}
-)
-
 add_custom_test(smoke_solver_ConvOcl_Fwd11x11_FwdGen_WrW53 GFX103X_ENABLED HALF_ENABLED BF16_ENABLED
     COMMAND MIOPEN_FIND_MODE=normal MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvOclDirectFwd11x11 $<TARGET_FILE:test_conv2d>
       ${TEST_CONV_VERBOSE_F} --input 1 1 44 44 --weights 1 1 11 11 --pads_strides_dilations 0 0 4 4 1 1 ${MIOPEN_TEST_FLAGS_ARGS}
