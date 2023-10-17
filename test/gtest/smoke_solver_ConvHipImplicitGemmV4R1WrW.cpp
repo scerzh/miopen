@@ -50,6 +50,10 @@ void GetArgs(const TestCase& param, std::vector<std::string>& tokens)
         tokens.push_back(*begin++);
 }
 
+class Conv2dFloat : public testing::TestWithParam<std::vector<TestCase>>
+{
+};
+
 class Conv2dHalf : public testing::TestWithParam<std::vector<TestCase>>
 {
 };
@@ -66,14 +70,14 @@ void Run2dDriver(miopenDataType_t prec)
     {
     case miopenHalf: params = Conv2dHalf::GetParam(); break;
     case miopenBFloat16: params = Conv2dBFloat16::GetParam(); break;
-    case miopenFloat:
+    case miopenFloat: params = Conv2dFloat::GetParam(); break;
     case miopenInt8:
     case miopenInt8x4:
     case miopenInt32:
     case miopenDouble:
     case miopenFloat8:
     case miopenBFloat8:
-        FAIL() << "miopenFloat, miopenInt8, miopenInt8x4, miopenInt32, "
+        FAIL() << "miopenInt8, miopenInt8x4, miopenInt32, "
                   "miopenDouble, miopenFloat8, miopenBFloat8 "
                   "data type not supported by "
                   "smoke_solver_ConvHipImplicitGemmV4R1WrW test";
@@ -111,6 +115,19 @@ bool IsTestSupportedForDevice(const miopen::Handle& handle)
     else
         return false;
 }
+
+TEST_P(Conv2dFloat, FloatTest)
+{
+    const auto& handle = get_handle();
+    if(IsTestSupportedForDevice(handle))
+    {
+        Run2dDriver(miopenFloat);
+    }
+    else
+    {
+        GTEST_SKIP();
+    }
+};
 
 TEST_P(Conv2dHalf, HalfTest)
 {
@@ -155,6 +172,10 @@ std::vector<TestCase> GetTestCases(void)
     };
     return test_cases;
 }
+
+INSTANTIATE_TEST_SUITE_P(SmokeSolverConvHipImplicitGemmV4R1WrW,
+                         Conv2dFloat,
+                         testing::Values(GetTestCases()));
 
 INSTANTIATE_TEST_SUITE_P(SmokeSolverConvHipImplicitGemmV4R1WrW,
                          Conv2dHalf,
