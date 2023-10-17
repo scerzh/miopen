@@ -65,7 +65,7 @@ void Run2dDriver(miopenDataType_t prec)
     switch(prec)
     {
     case miopenHalf: params = Conv2dHalf::GetParam(); break;
-    case miopenFloat: 
+    case miopenFloat:
     case miopenBFloat16:
     case miopenInt8:
     case miopenInt8x4:

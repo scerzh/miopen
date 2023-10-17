@@ -79,7 +79,8 @@ void Run2dDriver(miopenDataType_t prec)
     case miopenBFloat8:
         FAIL() << "miopenBFloat16, miopenInt8, miopenInt8x4, miopenInt32, "
                   "miopenDouble, miopenFloat8, miopenBFloat8 "
-                  "data type not supported by smoke_solver_ConvAsmImplicitGemmGTCDynamicXdlopsNHWC_fp32_fp16 test";
+                  "data type not supported by "
+                  "smoke_solver_ConvAsmImplicitGemmGTCDynamicXdlopsNHWC_fp32_fp16 test";
 
     default: params = Conv2dFloat::GetParam();
     }
@@ -142,20 +143,23 @@ TEST_P(Conv2dHalf, HalfTest)
 
 std::vector<TestCase> GetTestCases(void)
 {
-    std::vector<std::string> env_fwd = {"MIOPEN_FIND_ENFORCE=SEARCH_DB_UPDATE",
-                                        "MIOPEN_DEBUG_TUNING_ITERATIONS_MAX=5",
-                                        "MIOPEN_FIND_MODE=normal",
-                                        "MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvAsmImplicitGemmGTCDynamicFwdXdlopsNHWC"};
+    std::vector<std::string> env_fwd = {
+        "MIOPEN_FIND_ENFORCE=SEARCH_DB_UPDATE",
+        "MIOPEN_DEBUG_TUNING_ITERATIONS_MAX=5",
+        "MIOPEN_FIND_MODE=normal",
+        "MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvAsmImplicitGemmGTCDynamicFwdXdlopsNHWC"};
 
-    std::vector<std::string> env_bwd = {"MIOPEN_FIND_ENFORCE=SEARCH_DB_UPDATE",
-                                        "MIOPEN_DEBUG_TUNING_ITERATIONS_MAX=5",
-                                        "MIOPEN_FIND_MODE=normal",
-                                        "MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvAsmImplicitGemmGTCDynamicBwdXdlopsNHWC"};
-                    
-    std::vector<std::string> env_wrw = {"MIOPEN_FIND_ENFORCE=SEARCH_DB_UPDATE",
-                                        "MIOPEN_DEBUG_TUNING_ITERATIONS_MAX=5",
-                                        "MIOPEN_FIND_MODE=normal",
-                                        "MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvAsmImplicitGemmGTCDynamicWrwXdlopsNHWC"};
+    std::vector<std::string> env_bwd = {
+        "MIOPEN_FIND_ENFORCE=SEARCH_DB_UPDATE",
+        "MIOPEN_DEBUG_TUNING_ITERATIONS_MAX=5",
+        "MIOPEN_FIND_MODE=normal",
+        "MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvAsmImplicitGemmGTCDynamicBwdXdlopsNHWC"};
+
+    std::vector<std::string> env_wrw = {
+        "MIOPEN_FIND_ENFORCE=SEARCH_DB_UPDATE",
+        "MIOPEN_DEBUG_TUNING_ITERATIONS_MAX=5",
+        "MIOPEN_FIND_MODE=normal",
+        "MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvAsmImplicitGemmGTCDynamicWrwXdlopsNHWC"};
 
     std::string vf = " --verbose --disable-backward-data --disable-backward-weights";
     std::string vb = " --verbose --disable-forward --disable-backward-weights";
@@ -174,7 +178,7 @@ std::vector<TestCase> GetTestCases(void)
 INSTANTIATE_TEST_SUITE_P(SmokeSolverConvAsmImplicitGemmGTCDynamicXdlopsNhwcFp32Fp16,
                          Conv2dFloat,
                          testing::Values(GetTestCases()));
-                         
+
 INSTANTIATE_TEST_SUITE_P(SmokeSolverConvAsmImplicitGemmGTCDynamicXdlopsNhwcFp32Fp16,
                          Conv2dHalf,
                          testing::Values(GetTestCases()));
