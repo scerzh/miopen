@@ -50,7 +50,7 @@ void GetArgs(const TestCase& param, std::vector<std::string>& tokens)
         tokens.push_back(*begin++);
 }
 
-class Conv2dHalf : public testing::TestWithParam<std::vector<TestCase>>
+class Conv2dFloat : public testing::TestWithParam<std::vector<TestCase>>
 {
 };
 
@@ -60,8 +60,8 @@ void Run2dDriver(miopenDataType_t prec)
     std::vector<TestCase> params;
     switch(prec)
     {
-    case miopenHalf: params = Conv2dHalf::GetParam(); break;
-    case miopenFloat:
+    case miopenFloat: params = Conv2dFloat::GetParam(); break;
+    case miopenHalf:
     case miopenBFloat16:
     case miopenInt8:
     case miopenInt8x4:
@@ -69,12 +69,12 @@ void Run2dDriver(miopenDataType_t prec)
     case miopenDouble:
     case miopenFloat8:
     case miopenBFloat8:
-        FAIL() << "miopenFloat, miopenBFloat16, miopenInt8, miopenInt8x4, miopenInt32, "
+        FAIL() << "miopenHalf, miopenBFloat16, miopenInt8, miopenInt8x4, miopenInt32, "
                   "miopenDouble, miopenFloat8, miopenBFloat8 "
                   "data type not supported by "
-                  "smoke_solver_ConvCkIgemmFwdV6r1DlopsNchw test";
+                  "smoke_solver_ConvHipImplicitGemmBwdDataV1R1 test";
 
-    default: params = Conv2dHalf::GetParam();
+    default: params = Conv2dFloat::GetParam();
     }
 
     for(const auto& test_value : params)
@@ -108,12 +108,12 @@ bool IsTestSupportedForDevice(const miopen::Handle& handle)
         return false;
 }
 
-TEST_P(Conv2dHalf, HalfTest)
+TEST_P(Conv2dFloat, FloatTest)
 {
     const auto& handle = get_handle();
     if(IsTestSupportedForDevice(handle))
     {
-        Run2dDriver(miopenHalf);
+        Run2dDriver(miopenFloat);
     }
     else
     {
@@ -123,23 +123,22 @@ TEST_P(Conv2dHalf, HalfTest)
 
 std::vector<TestCase> GetTestCases(void)
 {
-    std::vector<std::string> env_fwd = {"MIOPEN_FIND_ENFORCE=SEARCH_DB_UPDATE",
-                                        "MIOPEN_DEBUG_TUNING_ITERATIONS_MAX=2",
-                                        "MIOPEN_DEBUG_CONVOLUTION_ATTRIB_FP16_ALT_IMPL=0",
-                                        "MIOPEN_FIND_MODE=normal",
-                                        "MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvCkIgemmFwdV6r1DlopsNchw",
-                                        "MIOPEN_DEBUG_CONV_CK_IGEMM_FWD_V6R1_DLOPS_NCHW=1"};
+    std::vector<std::string> env_fwd = {
+        "MIOPEN_FIND_ENFORCE=SEARCH_DB_UPDATE",
+        "MIOPEN_DEBUG_TUNING_ITERATIONS_MAX=5",
+        "MIOPEN_FIND_MODE=normal",
+        "MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvHipImplicitGemmBwdDataV1R1"};
 
-    std::string vf = " --verbose --disable-backward-data --disable-backward-weights";
+    std::string vb = " --verbose --disable-forward --disable-backward-weights";
 
     const std::vector<TestCase> test_cases = {
         // clang-format off
-    TestCase{env_fwd, vf + " --input 128 64 56 56 --weights 256 64 1 1 --pads_strides_dilations 0 0 1 1 1 1"}
+    TestCase{env_fwd, vb + " --input 32 128 32 32 --weights 12 128 1 1 --pads_strides_dilations 0 0 1 1 1 1"}
         // clang-format on
     };
     return test_cases;
 }
 
-INSTANTIATE_TEST_SUITE_P(SmokeSolverConvCkIgemmFwdV6r1DlopsNchw,
-                         Conv2dHalf,
+INSTANTIATE_TEST_SUITE_P(SmokeSolverConvHipImplicitGemmBwdDataV1R1,
+                         Conv2dFloat,
                          testing::Values(GetTestCases()));
