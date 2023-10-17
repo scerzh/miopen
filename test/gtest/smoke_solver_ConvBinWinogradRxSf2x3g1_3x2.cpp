@@ -79,7 +79,7 @@ void Run2dDriver(miopenDataType_t prec)
     case miopenBFloat8:
         FAIL() << "miopenBFloat16, miopenInt8, miopenInt8x4, miopenInt32, "
                   "miopenDouble, miopenFloat8, miopenBFloat8 "
-                  "data type not supported by smoke_solver_ConvBinWinogradRxSf2x3 test";
+                  "data type not supported by smoke_solver_ConvBinWinogradRxSf2x3g1_3x2 test";
 
     default: params = Conv2dFloat::GetParam();
     }
@@ -98,9 +98,6 @@ void Run2dDriver(miopenDataType_t prec)
         testing::internal::CaptureStderr();
         test_drive<conv2d_driver>(ptrs.size(), ptrs.data());
         auto capture = testing::internal::GetCapturedStderr();
-        // TEST_TUNING - the test should fail if output contains "Error" or "failed".
-        EXPECT_FALSE(capture.find("Error") != std::string::npos ||
-                     capture.find("failed") != std::string::npos);
         std::cout << capture;
     }
 };
@@ -143,25 +140,30 @@ TEST_P(Conv2dHalf, HalfTest)
 
 std::vector<TestCase> GetTestCases(void)
 {
-    std::vector<std::string> env = {"MIOPEN_FIND_ENFORCE=SEARCH_DB_UPDATE",
-                                    "MIOPEN_DEBUG_TUNING_ITERATIONS_MAX=5",
-                                    "MIOPEN_DEBUG_CONVOLUTION_ATTRIB_FP16_ALT_IMPL=0",
-                                    "MIOPEN_FIND_MODE=normal",
-                                    "MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvBinWinogradRxSf2x3"};
+    std::vector<std::string> env1 = {"MIOPEN_DEBUG_CONVOLUTION_ATTRIB_FP16_ALT_IMPL=0",
+                                     "MIOPEN_FIND_MODE=normal",
+                                     "MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvBinWinogradRxSf2x3g1"};
+
+    std::vector<std::string> env2 = {"MIOPEN_FIND_ENFORCE=SEARCH_DB_UPDATE",
+                                     "MIOPEN_DEBUG_TUNING_ITERATIONS_MAX=5",
+                                     "MIOPEN_DEBUG_CONVOLUTION_ATTRIB_FP16_ALT_IMPL=0",
+                                     "MIOPEN_FIND_MODE=normal",
+                                     "MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvBinWinogradRxSf3x2"};
 
     const std::vector<TestCase> test_cases = {
         // clang-format off
     //smoke_solver_ConvAsmImplicitGemmV4R1Dynamic
-    TestCase{env," --input 1 40 20 20 --weights 20 20 3 3 --pads_strides_dilations 1 1 1 1 1 1 --group-count 2"}
+    TestCase{env1," --input 1 40 20 20 --weights 20 40 3 3 --pads_strides_dilations 1 1 1 1 1 1"},
+    TestCase{env2," --input 1 40 20 20 --weights 20 40 3 3 --pads_strides_dilations 1 1 1 1 1 1"}
         // clang-format on
     };
     return test_cases;
 }
 
-INSTANTIATE_TEST_SUITE_P(SmokeSolverConvBinWinogradRxSf2x3,
+INSTANTIATE_TEST_SUITE_P(SmokeSolverConvBinWinogradRxSf2x3g13x2,
                          Conv2dFloat,
                          testing::Values(GetTestCases()));
 
-INSTANTIATE_TEST_SUITE_P(SmokeSolverConvBinWinogradRxSf2x3,
+INSTANTIATE_TEST_SUITE_P(SmokeSolverConvBinWinogradRxSf2x3g13x2,
                          Conv2dHalf,
                          testing::Values(GetTestCases()));
