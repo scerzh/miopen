@@ -76,7 +76,7 @@ void Run2dDriver(miopenDataType_t prec)
         FAIL() << "miopenFloat, miopenInt8, miopenInt8x4, miopenInt32, "
                   "miopenDouble, miopenFloat8, miopenBFloat8 "
                   "data type not supported by "
-                  "smoke_solver_ConvHipImplicitGemmBwdDataV4R1Xdlop test";
+                  "smoke_solver_ConvHipImplicitGemmDataV4RxXdlops test";
 
     default: params = Conv2dHalf::GetParam();
     }
@@ -139,6 +139,27 @@ TEST_P(Conv2dBFloat16, BFloat16Test)
 
 std::vector<TestCase> GetTestCases(void)
 {
+    std::vector<std::string> env_fwd = {
+        "MIOPEN_FIND_ENFORCE=SEARCH_DB_UPDATE",
+        "MIOPEN_DEBUG_TUNING_ITERATIONS_MAX=5",
+        "MIOPEN_DEBUG_CONVOLUTION_ATTRIB_FP16_ALT_IMPL=0",
+        "MIOPEN_FIND_MODE=normal",
+        "MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvHipImplicitGemmForwardV4R4Xdlops"};
+
+    std::vector<std::string> env_fwd_padded = {
+        "MIOPEN_FIND_ENFORCE=SEARCH_DB_UPDATE",
+        "MIOPEN_DEBUG_TUNING_ITERATIONS_MAX=5",
+        "MIOPEN_DEBUG_CONVOLUTION_ATTRIB_FP16_ALT_IMPL=0",
+        "MIOPEN_FIND_MODE=normal",
+        "MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvHipImplicitGemmForwardV4R4Xdlops_Padded_Gemm"};
+
+    std::vector<std::string> env_fwd_v4r5 = {
+        "MIOPEN_FIND_ENFORCE=SEARCH_DB_UPDATE",
+        "MIOPEN_DEBUG_TUNING_ITERATIONS_MAX=5",
+        "MIOPEN_DEBUG_CONVOLUTION_ATTRIB_FP16_ALT_IMPL=0",
+        "MIOPEN_FIND_MODE=normal",
+        "MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvHipImplicitGemmForwardV4R5Xdlops"};
+
     std::vector<std::string> env_bwd = {
         "MIOPEN_FIND_ENFORCE=SEARCH_DB_UPDATE",
         "MIOPEN_DEBUG_TUNING_ITERATIONS_MAX=5",
@@ -147,20 +168,41 @@ std::vector<TestCase> GetTestCases(void)
         "MIOPEN_FIND_MODE=normal",
         "MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvHipImplicitGemmBwdDataV4R1Xdlops"};
 
+    std::vector<std::string> env_wrw = {
+        "MIOPEN_FIND_ENFORCE=SEARCH_DB_UPDATE",
+        "MIOPEN_DEBUG_TUNING_ITERATIONS_MAX=5",
+        "MIOPEN_DEBUG_CONVOLUTION_ATTRIB_FP16_ALT_IMPL=0",
+        "MIOPEN_FIND_MODE=normal",
+        "MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvHipImplicitGemmWrwV4R4Xdlops"};
+
+    std::vector<std::string> env_wrw_padded = {
+        "MIOPEN_FIND_ENFORCE=SEARCH_DB_UPDATE",
+        "MIOPEN_DEBUG_TUNING_ITERATIONS_MAX=5",
+        "MIOPEN_DEBUG_CONVOLUTION_ATTRIB_FP16_ALT_IMPL=0",
+        "MIOPEN_FIND_MODE=normal",
+        "MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvHipImplicitGemmWrwV4R4Xdlops_Padded_Gemm"};
+
+    std::string vf = " --verbose --disable-backward-data --disable-backward-weights";
     std::string vb = " --verbose --disable-forward --disable-backward-weights";
+    std::string vw = " --verbose --disable-forward --disable-backward-data";
 
     const std::vector<TestCase> test_cases = {
         // clang-format off
-    TestCase{env_bwd, vb + " --input 64 64 55 55 --weights 64 64 1 1 --pads_strides_dilations 0 0 1 1 1 1"}
+    TestCase{env_fwd, vf + " --input 128 48 13 13 --weights 192 48 1 1 --pads_strides_dilations 0 0 1 1 1 1"},
+    TestCase{env_bwd, vb + " --input 64 64 55 55 --weights 64 64 1 1 --pads_strides_dilations 0 0 1 1 1 1"},
+    TestCase{env_wrw, vw + " --input 1 192 28 28 --weights 16 192 1 1 --pads_strides_dilations 0 0 1 1 1 1"},
+    TestCase{env_fwd, vf + " --input 16 1 7 7 --weights 1 1 3 3 --pads_strides_dilations 0 0 1 1 1 1"},
+    TestCase{env_wrw_padded, vw + " --input 256 2 5 5 --weights 1 2 3 3 --pads_strides_dilations 1 1 2 2 1 1"},
+    TestCase{env_fwd_v4r5, vf + " --input 128 16 54 54 --weights 64 16 3 3 --pads_strides_dilations 1 1 1 1 1 1"}
         // clang-format on
     };
     return test_cases;
 }
 
-INSTANTIATE_TEST_SUITE_P(SmokeSolverConvHipImplicitGemmBwdDataV4R1Xdlops,
+INSTANTIATE_TEST_SUITE_P(SmokeSolverConvHipImplicitGemmDataV4RxXdlops,
                          Conv2dHalf,
                          testing::Values(GetTestCases()));
 
-INSTANTIATE_TEST_SUITE_P(SmokeSolverConvHipImplicitGemmBwdDataV4R1Xdlops,
+INSTANTIATE_TEST_SUITE_P(SmokeSolverConvHipImplicitGemmDataV4RxXdlops,
                          Conv2dBFloat16,
                          testing::Values(GetTestCases()));
