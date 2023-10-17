@@ -1624,48 +1624,12 @@ add_custom_test(smoke_solver_ConvHipImplicitGemmFwdXdlops OCL_DISABLED GFX900_DI
       --in_layout NHWC --fil_layout NHWC --out_layout NHWC ${MIOPEN_TEST_FLAGS_ARGS}
 )
 
-# F32 is supported for 900, 906 and 908.
-add_custom_test(smoke_solver_ConvBinWinogradRxS_fp32 GFX90A_DISABLED SKIP_XNACK_ON
-    COMMAND MIOPEN_FIND_MODE=normal MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvBinWinogradRxS $<TARGET_FILE:test_conv2d>
-      ${TEST_CONV_VERBOSE_F} --input 1 20 20 20 --weights 20 20 3 3 --pads_strides_dilations 1 1 1 1 1 1 ${MIOPEN_TEST_FLAGS_ARGS}
-    COMMAND MIOPEN_FIND_MODE=normal MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvBinWinogradRxS $<TARGET_FILE:test_conv2d>
-      ${TEST_CONV_VERBOSE_B} --input 1 20 20 20 --weights 20 20 3 3 --pads_strides_dilations 1 1 1 1 1 1 ${MIOPEN_TEST_FLAGS_ARGS}
-    COMMAND MIOPEN_FIND_MODE=normal MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvBinWinogradRxS $<TARGET_FILE:test_conv2d>
-      ${TEST_CONV_VERBOSE_W} --input 1 20 20 20 --weights 20 20 3 3 --pads_strides_dilations 1 1 1 1 1 1 ${MIOPEN_TEST_FLAGS_ARGS}
-)
-
-# FP16 ALT attribute is disabled to enable the backward solver on MI200 for HALF.
-add_custom_test(smoke_solver_ConvBinWinogradRxSf2x3g1_f16 GFX103X_ENABLED GFX110X_ENABLED FLOAT_DISABLED HALF_ENABLED SKIP_XNACK_ON
-    COMMAND MIOPEN_DEBUG_CONVOLUTION_ATTRIB_FP16_ALT_IMPL=0
-      MIOPEN_FIND_MODE=normal MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvBinWinogradRxSf2x3g1 $<TARGET_FILE:test_conv2d>
-      ${TEST_CONV_VERBOSE_F} --input 1 40 20 20 --weights 20 40 3 3 --pads_strides_dilations 1 1 1 1 1 1 ${MIOPEN_TEST_FLAGS_ARGS}
-    COMMAND MIOPEN_DEBUG_CONVOLUTION_ATTRIB_FP16_ALT_IMPL=0
-      MIOPEN_FIND_MODE=normal MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvBinWinogradRxSf2x3g1 $<TARGET_FILE:test_conv2d>
-      ${TEST_CONV_VERBOSE_B} --input 1 20 20 20 --weights 40 20 3 3 --pads_strides_dilations 1 1 1 1 1 1 ${MIOPEN_TEST_FLAGS_ARGS}
-    COMMAND MIOPEN_DEBUG_CONVOLUTION_ATTRIB_FP16_ALT_IMPL=0
-      MIOPEN_FIND_MODE=normal MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvBinWinogradRxSf2x3g1 $<TARGET_FILE:test_conv2d>
-      ${TEST_CONV_VERBOSE_W} --input 1 20 20 20 --weights 20 20 3 3 --pads_strides_dilations 1 1 1 1 1 1 ${MIOPEN_TEST_FLAGS_ARGS}
-)
-
 add_custom_test(smoke_solver_ConvBinWinogradRxSf2x3g1_f32 GFX103X_ENABLED GFX110X_ENABLED SKIP_XNACK_ON
     COMMAND MIOPEN_FIND_MODE=normal MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvBinWinogradRxSf2x3g1 $<TARGET_FILE:test_conv2d>
       ${TEST_CONV_VERBOSE_F} --input 1 20 20 20 --weights 20 20 3 3 --pads_strides_dilations 1 1 1 1 1 1 ${MIOPEN_TEST_FLAGS_ARGS}
     COMMAND MIOPEN_FIND_MODE=normal MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvBinWinogradRxSf2x3g1 $<TARGET_FILE:test_conv2d>
       ${TEST_CONV_VERBOSE_B} --input 1 20 20 20 --weights 20 20 3 3 --pads_strides_dilations 1 1 1 1 1 1 ${MIOPEN_TEST_FLAGS_ARGS}
     COMMAND MIOPEN_FIND_MODE=normal MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvBinWinogradRxSf2x3g1 $<TARGET_FILE:test_conv2d>
-      ${TEST_CONV_VERBOSE_W} --input 1 20 20 20 --weights 20 20 3 3 --pads_strides_dilations 1 1 1 1 1 1 ${MIOPEN_TEST_FLAGS_ARGS}
-)
-
-# FP16 ALT attribute is disabled to enable the backward solver on MI200 for HALF.
-add_custom_test(smoke_solver_ConvBinWinogradRxSf3x2_f16 GFX103X_ENABLED GFX110X_ENABLED FLOAT_DISABLED HALF_ENABLED SKIP_XNACK_ON
-    COMMAND MIOPEN_DEBUG_CONVOLUTION_ATTRIB_FP16_ALT_IMPL=0
-      MIOPEN_FIND_MODE=normal MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvBinWinogradRxSf3x2 $<TARGET_FILE:test_conv2d>
-      ${TEST_CONV_VERBOSE_F} --input 1 40 20 20 --weights 20 40 3 3 --pads_strides_dilations 1 1 1 1 1 1 ${MIOPEN_TEST_FLAGS_ARGS}
-    COMMAND MIOPEN_DEBUG_CONVOLUTION_ATTRIB_FP16_ALT_IMPL=0
-      MIOPEN_FIND_MODE=normal MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvBinWinogradRxSf3x2 $<TARGET_FILE:test_conv2d>
-      ${TEST_CONV_VERBOSE_B} --input 1 20 20 20 --weights 40 20 3 3 --pads_strides_dilations 1 1 1 1 1 1 ${MIOPEN_TEST_FLAGS_ARGS}
-    COMMAND MIOPEN_DEBUG_CONVOLUTION_ATTRIB_FP16_ALT_IMPL=0
-      MIOPEN_FIND_MODE=normal MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvBinWinogradRxSf3x2 $<TARGET_FILE:test_conv2d>
       ${TEST_CONV_VERBOSE_W} --input 1 20 20 20 --weights 20 20 3 3 --pads_strides_dilations 1 1 1 1 1 1 ${MIOPEN_TEST_FLAGS_ARGS}
 )
 

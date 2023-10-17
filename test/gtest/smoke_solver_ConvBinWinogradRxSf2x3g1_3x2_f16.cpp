@@ -75,7 +75,7 @@ void Run2dDriver(miopenDataType_t prec)
     case miopenBFloat8:
         FAIL() << "miopenFloat, miopenBFloat16, miopenInt8, miopenInt8x4, miopenInt32, "
                   "miopenDouble, miopenFloat8, miopenBFloat8 "
-                  "data type not supported by smoke_solver_ConvBinWinogradRxS_fp16 test";
+                  "data type not supported by smoke_solver_ConvBinWinogradRxSf2x3g1_3x2_f16 test";
 
     default: params = Conv2dHalf::GetParam();
     }
@@ -101,8 +101,10 @@ void Run2dDriver(miopenDataType_t prec)
 bool IsTestSupportedForDevice(const miopen::Handle& handle)
 {
     std::string devName = handle.GetDeviceName();
-    // F16 is supported for 906 and 906 only, no WrW
-    if(devName == "gfx906")
+
+    if(if(devName == "gfx900" || devName == "gfx906" || devName == "gfx908" ||
+          devName == "gfx90a" || miopen::StartsWith(devName, "gfx103") ||
+          miopen::StartsWith(devName, "gfx110")))
         return true;
     else
         return false;
@@ -123,22 +125,32 @@ TEST_P(Conv2dHalf, HalfTest)
 
 std::vector<TestCase> GetTestCases(void)
 {
-    std::vector<std::string> env = {"MIOPEN_FIND_MODE=normal",
-                                    "MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvBinWinogradRxS"};
+    std::vector<std::string> env_2x3 = {"MIOPEN_DEBUG_CONVOLUTION_ATTRIB_FP16_ALT_IMPL=0",
+                                        "MIOPEN_FIND_MODE=normal",
+                                        "MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvBinWinogradRxSf2x3g1"};
+
+    std::vector<std::string> env_3x2 = {"MIOPEN_DEBUG_CONVOLUTION_ATTRIB_FP16_ALT_IMPL=0",
+                                        "MIOPEN_FIND_MODE=normal",
+                                        "MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvBinWinogradRxSf3x2"};
 
     std::string vf = " --verbose --disable-backward-data --disable-backward-weights";
     std::string vb = " --verbose --disable-forward --disable-backward-weights";
+    std::string vw = " --verbose --disable-forward --disable-backward-data";
 
     const std::vector<TestCase> test_cases = {
         // clang-format off
     //smoke_solver_ConvAsmImplicitGemmV4R1Dynamic
-    TestCase{env, vf + " --input 1 40 20 20 --weights 20 40 3 3 --pads_strides_dilations 1 1 1 1 1 1"},
-    TestCase{env, vb + " --input 1 20 20 20 --weights 40 20 3 3 --pads_strides_dilations 1 1 1 1 1 1"}
+    TestCase{env_2x3, vf + " --input 1 40 20 20 --weights 20 40 3 3 --pads_strides_dilations 1 1 1 1 1 1"},
+    TestCase{env_2x3, vb + " --input 1 20 20 20 --weights 40 20 3 3 --pads_strides_dilations 1 1 1 1 1 1"},
+    TestCase{env_2x3, vw + " --input 1 20 20 20 --weights 20 20 3 3 --pads_strides_dilations 1 1 1 1 1 1"},
+    TestCase{env_3x2, vf + " --input 1 40 20 20 --weights 20 40 3 3 --pads_strides_dilations 1 1 1 1 1 1"},
+    TestCase{env_3x2, vb + " --input 1 20 20 20 --weights 40 20 3 3 --pads_strides_dilations 1 1 1 1 1 1"},
+    TestCase{env_3x2, vw + " --input 1 20 20 20 --weights 20 20 3 3 --pads_strides_dilations 1 1 1 1 1 1"}
         // clang-format on
     };
     return test_cases;
 }
 
-INSTANTIATE_TEST_SUITE_P(SmokeSolverConvBinWinogradRxSFp16,
+INSTANTIATE_TEST_SUITE_P(SmokeSolverConvBinWinogradRxSf2x3g13x2F16,
                          Conv2dHalf,
                          testing::Values(GetTestCases()));
