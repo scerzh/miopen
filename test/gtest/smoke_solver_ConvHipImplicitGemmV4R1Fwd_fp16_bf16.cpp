@@ -50,10 +50,6 @@ void GetArgs(const TestCase& param, std::vector<std::string>& tokens)
         tokens.push_back(*begin++);
 }
 
-class Conv2dFloat : public testing::TestWithParam<std::vector<TestCase>>
-{
-};
-
 class Conv2dHalf : public testing::TestWithParam<std::vector<TestCase>>
 {
 };
@@ -70,19 +66,19 @@ void Run2dDriver(miopenDataType_t prec)
     {
     case miopenHalf: params = Conv2dHalf::GetParam(); break;
     case miopenBFloat16: params = Conv2dBFloat16::GetParam(); break;
-    case miopenFloat: params = Conv2dFloat::GetParam(); break;
+    case miopenFloat:
     case miopenInt8:
     case miopenInt8x4:
     case miopenInt32:
     case miopenDouble:
     case miopenFloat8:
     case miopenBFloat8:
-        FAIL() << "miopenInt8, miopenInt8x4, miopenInt32, "
+        FAIL() << "miopenFloat, miopenInt8, miopenInt8x4, miopenInt32, "
                   "miopenDouble, miopenFloat8, miopenBFloat8 "
                   "data type not supported by "
-                  "smoke_solver_ConvHipImplicitGemmV4R1WrW test";
+                  "smoke_solver_ConvHipImplicitGemmV4R1Fwd_fp16_bf16 test";
 
-    default: params = Conv2dFloat::GetParam();
+    default: params = Conv2dHalf::GetParam();
     }
 
     for(const auto& test_value : params)
@@ -116,19 +112,6 @@ bool IsTestSupportedForDevice(const miopen::Handle& handle)
         return false;
 }
 
-TEST_P(Conv2dFloat, FloatTest)
-{
-    const auto& handle = get_handle();
-    if(IsTestSupportedForDevice(handle))
-    {
-        Run2dDriver(miopenFloat);
-    }
-    else
-    {
-        GTEST_SKIP();
-    }
-};
-
 TEST_P(Conv2dHalf, HalfTest)
 {
     const auto& handle = get_handle();
@@ -157,30 +140,28 @@ TEST_P(Conv2dBFloat16, BFloat16Test)
 
 std::vector<TestCase> GetTestCases(void)
 {
-    std::vector<std::string> env_wrw = {"MIOPEN_FIND_ENFORCE=SEARCH_DB_UPDATE",
+    std::vector<std::string> env_fwd = {"MIOPEN_FIND_ENFORCE=SEARCH_DB_UPDATE",
                                         "MIOPEN_DEBUG_TUNING_ITERATIONS_MAX=5",
+                                        "MIOPEN_DEBUG_CONV_IMPLICIT_GEMM_HIP_FWD_V4R1=1",
                                         "MIOPEN_DEBUG_CONVOLUTION_ATTRIB_FP16_ALT_IMPL=0",
                                         "MIOPEN_FIND_MODE=normal",
-                                        "MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvHipImplicitGemmV4R1WrW"};
+                                        "MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvHipImplicitGemmV4R1Fwd"};
 
-    std::string vw = " --verbose --disable-forward --disable-backward-data";
+    std::string vf       = " --verbose --disable-backward-data --disable-backward-weights";
+    std::string dis_vali = " --disable-validation";
 
     const std::vector<TestCase> test_cases = {
         // clang-format off
-    TestCase{env_wrw, vw + " --input 64 64 55 55 --weights 64 64 1 1 --pads_strides_dilations 0 0 1 1 1 1"}
+    TestCase{env_fwd, vf + " --input 256 32 27 27 --weights 128 32 1 1 --pads_strides_dilations 0 0 1 1 1 1" + dis_vali}
         // clang-format on
     };
     return test_cases;
 }
 
-INSTANTIATE_TEST_SUITE_P(SmokeSolverConvHipImplicitGemmV4R1WrW,
-                         Conv2dFloat,
-                         testing::Values(GetTestCases()));
-
-INSTANTIATE_TEST_SUITE_P(SmokeSolverConvHipImplicitGemmV4R1WrW,
+INSTANTIATE_TEST_SUITE_P(SmokeSolverConvHipImplicitGemmV4R1FwdFp16Bf16,
                          Conv2dHalf,
                          testing::Values(GetTestCases()));
 
-INSTANTIATE_TEST_SUITE_P(SmokeSolverConvHipImplicitGemmV4R1WrW,
+INSTANTIATE_TEST_SUITE_P(SmokeSolverConvHipImplicitGemmV4R1FwdFp16Bf16,
                          Conv2dBFloat16,
                          testing::Values(GetTestCases()));
