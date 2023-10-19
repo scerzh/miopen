@@ -35,6 +35,12 @@
 #include "tensor_util.hpp"
 #include "get_handle.hpp"
 
+// setting this to "enabled" makes ./bin/test_bn_bwd --gtest_filter=*BnBwdCKFloat/0 failed
+// and ./bin/test_bn_bwd --gtest_filter=*BnBwdCKFloat/24 (25 and 26) passed
+// while setting it to "true" makes opposite: 0 starts to pass and 24, 25, 26 start to fail
+// the other cases are not affected
+// the same problem happens for half precision as well
+MIOPEN_DECLARE_ENV_VAR(MIOPEN_DEBUG_UNSTABLE_BN)
 struct BNTestCase
 {
     size_t N;
@@ -301,6 +307,14 @@ private:
     void InitTensorsWithRandValue()
     {
         auto gen_value = [](auto...) {
+            if(miopen::IsEnabled(MIOPEN_DEBUG_UNSTABLE_BN{}))
+            {
+                // just advace PRNG to get slighly different sequence. but
+                // but with the same probability distribution and so on
+                prng::gen_canonical<int>();
+                prng::gen_canonical<int>();
+                prng::gen_canonical<int>();
+            }
             return prng::gen_descreet_uniform_sign<ScaleDataType>(1e-2, 100);
         };
         dy.generate(gen_value);
