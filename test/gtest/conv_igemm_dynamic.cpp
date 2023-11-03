@@ -24,7 +24,6 @@
  *
  *******************************************************************************/
 #include <tuple>
-
 #include <miopen/miopen.h>
 #include <gtest/gtest.h>
 #include "../conv2d.hpp"
@@ -57,44 +56,37 @@ class Conv2dFloat : public testing::TestWithParam<std::vector<TestCase>>
 {
 };
 
-void Run2dDriver(miopenDataType_t prec)
+void Run2dDriver(miopenDataType_t prec, const unsigned int entry)
 {
-
     std::vector<TestCase> params;
     switch(prec)
     {
     case miopenFloat: params = Conv2dFloat::GetParam(); break;
     case miopenHalf:
     case miopenInt8:
-    case miopenBFloat16:
     case miopenInt8x4:
+    case miopenBFloat16:
     case miopenInt32:
     case miopenDouble:
     case miopenFloat8:
     case miopenBFloat8:
-        FAIL() << "miopenHalf, miopenInt8, miopenBFloat16, miopenInt8x4, miopenInt32, "
+        FAIL() << "miopenHalf, miopenInt8, miopenInt8x4, miopenBFloat16, miopenInt32, "
                   "miopenDouble, miopenFloat8, miopenBFloat8 "
                   "data type not supported by conv_igemm_dynamic test";
 
     default: params = Conv2dFloat::GetParam();
     }
 
-    for(const auto& test_value : params)
-    {
-        std::vector<std::string> tokens;
-        GetArgs(test_value, tokens);
-        std::vector<const char*> ptrs;
+    std::vector<std::string> tokens;
+    GetArgs(params[entry], tokens);
+    std::vector<const char*> ptrs;
 
-        std::transform(tokens.begin(),
-                       tokens.end(),
-                       std::back_inserter(ptrs),
-                       [](const std::string& str) { return str.data(); });
+    std::transform(tokens.begin(),
+                   tokens.end(),
+                   std::back_inserter(ptrs),
+                   [](const std::string& str) { return str.data(); });
 
-        //testing::internal::CaptureStderr();
-        test_drive<conv2d_driver>(ptrs.size(), ptrs.data());
-        //auto capture = testing::internal::GetCapturedStderr();
-        //std::cout << capture;
-    }
+    test_drive<conv2d_driver>(ptrs.size(), ptrs.data());
 };
 
 bool IsTestSupportedForDevice(const miopen::Handle& handle)
@@ -106,41 +98,45 @@ bool IsTestSupportedForDevice(const miopen::Handle& handle)
         return false;
 }
 
-int Conv2dFloatTest(void)
+int Conv2dFloatTest(const unsigned int entry)
 {
-    int flow = 0;
+    int flow           = 0;
     const auto& handle = get_handle();
     if(IsTestSupportedForDevice(handle) && !SkipTest())
     {
-        Run2dDriver(miopenFloat);
+        Run2dDriver(miopenFloat, entry);
         flow = 1;
     }
     return flow;
 }
 
-[[noreturn]] void Conv2dFloatTestWrapper(void)
+[[noreturn]] void Conv2dFloatTestWrapper(const unsigned int entry)
 {
     setenv("MIOPEN_DEBUG_FIND_ONLY_SOLVER", "ConvAsmImplicitGemmV4R1DynamicFwd", 1);
-
-    auto actual = Conv2dFloatTest();
+    auto actual = Conv2dFloatTest(entry);
     std::cout << "actual: " << actual << std::endl;
     _exit(actual);
 }
 
-
 TEST_P(Conv2dFloat, FloatTest)
 {
-    //GTEST_FLAG_SET(death_test_style, "threadsafe");
+    (void)(::testing::GTEST_FLAG(death_test_style) = "threadsafe");
     std::cout << "  thread id: " << std::this_thread::get_id() << std::endl;
-    EXPECT_EXIT(Conv2dFloatTestWrapper(), testing::ExitedWithCode(1), "");
+    EXPECT_EXIT(Conv2dFloatTestWrapper(0), testing::ExitedWithCode(1), "");
+};
+
+TEST_P(Conv2dFloat, FloatTest1)
+{
+    (void)(::testing::GTEST_FLAG(death_test_style) = "threadsafe");
+    std::cout << "  thread id: " << std::this_thread::get_id() << std::endl;
+    EXPECT_EXIT(Conv2dFloatTestWrapper(1), testing::ExitedWithCode(1), "");
 };
 
 std::vector<TestCase> GetTestCases(const std::string& precision)
 {
 
-    std::vector<std::string> env = {
-        "MIOPEN_FIND_MODE=normal"};
-        //,"MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvAsmImplicitGemmV4R1DynamicFwd"};
+    std::vector<std::string> env = {"MIOPEN_FIND_MODE=normal"};
+    //,"MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvAsmImplicitGemmV4R1DynamicFwd"};
     std::vector<std::string> env_1x1 = {
         "MIOPEN_FIND_MODE=normal",
         "MIOPEN_DEBUG_FIND_ONLY_SOLVER=ConvAsmImplicitGemmV4R1DynamicFwd_1x1"};
