@@ -24,12 +24,12 @@
  *
  *******************************************************************************/
 #include <tuple>
-
 #include <miopen/miopen.h>
 #include <gtest/gtest.h>
-#include <miopen/miopen.h>
 #include "../conv2d.hpp"
 #include "get_handle.hpp"
+
+using TestCase = std::tuple<std::vector<std::string>, std::string>;
 
 void GetArgs(const TestCase& param, std::vector<std::string>& tokens)
 {

@@ -24,10 +24,8 @@
  *
  *******************************************************************************/
 #include <tuple>
-
 #include <miopen/miopen.h>
 #include <gtest/gtest.h>
-#include <miopen/miopen.h>
 #include "../conv2d.hpp"
 #include "get_handle.hpp"
 
@@ -102,9 +100,8 @@ bool IsTestSupportedForDevice(const miopen::Handle& handle)
 {
     std::string devName = handle.GetDeviceName();
 
-    if(if(devName == "gfx900" || devName == "gfx906" || devName == "gfx908" ||
-          devName == "gfx90a" || miopen::StartsWith(devName, "gfx103") ||
-          miopen::StartsWith(devName, "gfx110")))
+    if(devName == "gfx900" || devName == "gfx906" || devName == "gfx908" || devName == "gfx90a" ||
+       miopen::StartsWith(devName, "gfx103") || miopen::StartsWith(devName, "gfx110"))
         return true;
     else
         return false;
