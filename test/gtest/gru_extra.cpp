@@ -26,6 +26,7 @@
 #include <miopen/miopen.h>
 #include <gtest/gtest.h>
 #include <miopen/env.hpp>
+#include "../gru.hpp"
 #include "get_handle.hpp"
 
 void GetArgs(const std::string& param, std::vector<std::string>& tokens)
