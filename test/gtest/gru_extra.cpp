@@ -29,7 +29,7 @@
 #include "../gru.hpp"
 #include "get_handle.hpp"
 
-MIOPEN_DECLARE_ENV_VAR(MIOPEN_TEST_ALL)
+MIOPEN_DECLARE_ENV_VAR_BOOL(MIOPEN_TEST_ALL)
 
 static bool SkipTest(void) { return miopen::IsDisabled(MIOPEN_TEST_ALL{}); }
 
