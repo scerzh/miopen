@@ -29,6 +29,10 @@
 #include "../rnn_vanilla.hpp"
 #include "get_handle.hpp"
 
+MIOPEN_DECLARE_ENV_VAR(MIOPEN_TEST_ALL)
+
+static bool SkipTest(void) { return miopen::IsDisabled(MIOPEN_TEST_ALL{}); }
+
 void GetArgs(const std::string& param, std::vector<std::string>& tokens)
 {
     std::stringstream ss(param);
@@ -95,7 +99,7 @@ bool IsTestSupportedForDevice(const miopen::Handle& handle)
 TEST_P(ConfigWithFloat, FloatTest)
 {
     const auto& handle = get_handle();
-    if(IsTestSupportedForDevice(handle))
+    if(IsTestSupportedForDevice(handle) && !SkipTest())
     {
         Run2dDriver(miopenFloat);
     }
