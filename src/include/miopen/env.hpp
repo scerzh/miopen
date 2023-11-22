@@ -31,24 +31,32 @@
 #include <string>
 #include <vector>
 
-#include <miopen/errors.hpp>
-
 namespace miopen {
 
-namespace internal {
+/// \todo Rework: Case-insensitive string compare, ODR, (?) move to .cpp
 
-template <typename T>
-struct ParseEnvVal
-{
-};
+// Declare a cached environment variable
+#define MIOPEN_DECLARE_ENV_VAR(x)                 \
+    struct x                                      \
+    {                                             \
+        static const char* value() { return #x; } \
+    };
 
-template <>
-struct ParseEnvVal<bool>
+/*
+ * Returns false if a feature-controlling environment variable is defined
+ * and set to something which disables a feature.
+ */
+inline bool IsEnvvarValueDisabled(const char* name)
 {
-    static bool go(const char* vp)
+    // NOLINTNEXTLINE (concurrency-mt-unsafe)
+    const auto value_env_p = std::getenv(name);
+    if(value_env_p == nullptr)
     {
-        std::string value_env_str{vp};
-
+        return false;
+    }
+    else
+    {
+        std::string value_env_str = value_env_p;
         for(auto& c : value_env_str)
         {
             if(std::isalpha(c) != 0)
@@ -56,141 +64,98 @@ struct ParseEnvVal<bool>
                 c = std::tolower(static_cast<unsigned char>(c));
             }
         }
-
-        if(value_env_str == "disable" || value_env_str == "disabled" || value_env_str == "0" ||
-           value_env_str == "no" || value_env_str == "off" || value_env_str == "false")
-        {
-            return false;
-        }
-        else if(value_env_str == "enable" || value_env_str == "enabled" || value_env_str == "1" ||
-                value_env_str == "yes" || value_env_str == "on" || value_env_str == "true")
-        {
-            return true;
-        }
-        else
-        {
-            MIOPEN_THROW(miopenStatusInvalidValue, "Invalid value for env variable");
-        }
-
-        return false; // shouldn't reach here
+        return (std::strcmp(value_env_str.c_str(), "disable") == 0 ||
+                std::strcmp(value_env_str.c_str(), "disabled") == 0 ||
+                std::strcmp(value_env_str.c_str(), "0") == 0 ||
+                std::strcmp(value_env_str.c_str(), "no") == 0 ||
+                std::strcmp(value_env_str.c_str(), "off") == 0 ||
+                std::strcmp(value_env_str.c_str(), "false") == 0);
     }
-};
+}
 
-// Supports hexadecimals (with leading "0x"), octals (if prefix is "0") and decimals (default).
-// Returns 0 if environment variable is in wrong format (strtoull fails to parse the string).
-template <>
-struct ParseEnvVal<uint64_t>
+inline bool IsEnvvarValueEnabled(const char* name)
 {
-    static uint64_t go(const char* vp) { return std::strtoull(vp, nullptr, 0); }
-};
-
-template <>
-struct ParseEnvVal<std::string>
-{
-    static std::string go(const char* vp) { return std::string{vp}; }
-};
-
-template <typename T>
-struct EnvVar
-{
-private:
-    T value{};
-    bool is_unset = true;
-
-public:
-    const T& GetValue() const { return value; }
-
-    bool IsUnset() const { return is_unset; }
-
-    void UpdateValue(const T& val)
+    // NOLINTNEXTLINE (concurrency-mt-unsafe)
+    const auto value_env_p = std::getenv(name);
+    if(value_env_p == nullptr)
     {
-        is_unset = false;
-        value    = val;
+        return false;
     }
-
-    explicit EnvVar(const char* const name, const T& def_val)
+    else
     {
-        // NOLINTNEXTLINE (concurrency-mt-unsafe)
-        const char* vp = std::getenv(name);
-        if(vp != nullptr) // a value was provided
+        std::string value_env_str = value_env_p;
+        for(auto& c : value_env_str)
         {
-            is_unset = false;
-            value    = ParseEnvVal<T>::go(vp);
+            if(std::isalpha(c) != 0)
+            {
+                c = std::tolower(static_cast<unsigned char>(c));
+            }
         }
-        else // no value provided, use default value
-        {
-            value = def_val;
-        }
+        return (std::strcmp(value_env_str.c_str(), "enable") == 0 ||
+                std::strcmp(value_env_str.c_str(), "enabled") == 0 ||
+                std::strcmp(value_env_str.c_str(), "1") == 0 ||
+                std::strcmp(value_env_str.c_str(), "yes") == 0 ||
+                std::strcmp(value_env_str.c_str(), "on") == 0 ||
+                std::strcmp(value_env_str.c_str(), "true") == 0);
     }
-};
-
-} // end namespace internal
-
-// static inside function hides the variable and provides
-// thread-safety/locking
-#define MIOPEN_DECLARE_ENV_VAR(name, type, default_val)                    \
-    struct name                                                            \
-    {                                                                      \
-        using value_type = type;                                           \
-        static miopen::internal::EnvVar<type>& Ref()                       \
-        {                                                                  \
-            static miopen::internal::EnvVar<type> var{#name, default_val}; \
-            return var;                                                    \
-        }                                                                  \
-    };
-
-#define MIOPEN_DECLARE_ENV_VAR_BOOL(name) MIOPEN_DECLARE_ENV_VAR(name, bool, false)
-
-#define MIOPEN_DECLARE_ENV_VAR_UINT64(name) MIOPEN_DECLARE_ENV_VAR(name, uint64_t, 0)
-
-#define MIOPEN_DECLARE_ENV_VAR_STR(name) MIOPEN_DECLARE_ENV_VAR(name, std::string, "")
-
-/// \todo the following functions should be renamed to either include the word Env
-/// or put inside a namespace 'env'. Right now we have a function named Value()
-/// that returns env var value as only 64-bit ints
-
-template <class EnvVar>
-inline const std::string& GetStringEnv(EnvVar)
-{
-    static_assert(std::is_same_v<typename EnvVar::value_type, std::string>);
-    return EnvVar::Ref().GetValue();
 }
 
-template <class EnvVar>
-inline bool IsEnabled(EnvVar)
+// Return 0 if env is enabled else convert environment var to an int.
+// Supports hexadecimal with leading 0x or decimal
+inline uint64_t EnvvarValue(const char* name, uint64_t fallback = 0)
 {
-    static_assert(std::is_same_v<typename EnvVar::value_type, bool>);
-    return !EnvVar::Ref().IsUnset() && EnvVar::Ref().GetValue();
+    // NOLINTNEXTLINE (concurrency-mt-unsafe)
+    const auto value_env_p = std::getenv(name);
+    if(value_env_p == nullptr)
+    {
+        return fallback;
+    }
+    else
+    {
+        return strtoull(value_env_p, nullptr, 0);
+    }
 }
 
-template <class EnvVar>
-inline bool IsDisabled(EnvVar)
+inline std::vector<std::string> GetEnv(const char* name)
 {
-    static_assert(std::is_same_v<typename EnvVar::value_type, bool>);
-    return !EnvVar::Ref().IsUnset() && !EnvVar::Ref().GetValue();
+    // NOLINTNEXTLINE (concurrency-mt-unsafe)
+    const auto p = std::getenv(name);
+    if(p == nullptr)
+        return {};
+    else
+        return {{p}};
 }
 
-template <class EnvVar>
-inline uint64_t Value(EnvVar)
+template <class T>
+inline const char* GetStringEnv(T)
 {
-    static_assert(std::is_same_v<typename EnvVar::value_type, uint64_t>);
-    return EnvVar::Ref().GetValue();
+    static const std::vector<std::string> result = GetEnv(T::value());
+    if(result.empty())
+        return nullptr;
+    else
+        return result.front().c_str();
 }
 
-template <class EnvVar>
-inline bool IsUnset(EnvVar)
+template <class T>
+inline bool IsEnabled(T)
 {
-    return EnvVar::Ref().IsUnset();
+    static const bool result = miopen::IsEnvvarValueEnabled(T::value());
+    return result;
 }
 
-/// updates the cached value of an environment variable
-template <typename EnvVar, typename ValueType>
-void UpdateEnvVar(EnvVar, const ValueType& val)
+template <class T>
+inline bool IsDisabled(T)
 {
-    static_assert(std::is_same_v<typename EnvVar::value_type, ValueType>);
-    EnvVar::Ref().UpdateValue(val);
+    static const bool result = miopen::IsEnvvarValueDisabled(T::value());
+    return result;
 }
 
+template <class T>
+inline uint64_t Value(T, uint64_t fallback = 0)
+{
+    static const auto result = miopen::EnvvarValue(T::value(), fallback);
+    return result;
+}
 } // namespace miopen
 
 #endif
