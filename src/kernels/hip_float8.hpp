@@ -262,8 +262,7 @@ struct hip_f8
 
     inline MIOPEN_HIP_HOST_DEVICE bool operator==(const hip_f8& rhs) const
     {
-        if((rhs.is_zero() && this->is_zero()) ||
-           (fabs(rhs - *this) < std::numeric_limits<hip_f8<T>>::epsilon()))
+        if((rhs.is_zero() && this->is_zero()) || (rhs.data == this->data))
         {
             return true;
         }
@@ -490,6 +489,7 @@ MIOPEN_HIP_HOST_DEVICE T F8_Max()
 } // namespace miopen_f8
 
 // define numeric limits for the new data type
+#ifndef __HIPCC_RTC__
 namespace std {
 inline bool isfinite(miopen_f8::hip_f8<miopen_f8::hip_f8_type::fp8> x) // NOLINT
 {
@@ -556,6 +556,7 @@ public:
 };
 
 } // namespace std
+#endif
 
 template <miopen_f8::hip_f8_type T>
 struct hip_f8x4
