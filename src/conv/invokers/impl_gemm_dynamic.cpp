@@ -40,7 +40,7 @@ static float CallImplGemmDynamicForward1x1(const miopen::Handle& handle,
 {
     float elapsed = 0.0f;
 
-    auto kernel = kernels[0];
+    const auto& kernel = kernels[0];
     MIOPEN_LOG_I(kernel.GetName());
 
     // clang-format off
@@ -182,7 +182,7 @@ InvokerFactory MakeImplGemmDynamicBackwardDataInvokerFactory(const ProblemDescri
         need_set_zero = true;
 
     return [=](const std::vector<Kernel>& kernels) {
-        const auto kernel = kernels[0];
+        const auto& kernel = kernels[0];
         return [=](const Handle& handle, const AnyInvokeParams& primitive_parameters) {
             decltype(auto) data_ctx = primitive_parameters.CastTo<conv::DataInvokeParams>();
             const auto& tensors     = data_ctx.tensors;
@@ -360,7 +360,7 @@ MakeImplGemmDynamicBackwardDataInvokerFactory(const ProblemDescription& problem,
     shift_pack_1 = magic_div_u32_pack_shift(mdiv_4.shift, mdiv_5.shift, mdiv_6.shift, 0);
 
     return [=](const std::vector<Kernel>& kernels) {
-        const auto kernel = kernels[0];
+        const auto& kernel = kernels[0];
         return [=](const Handle& handle, const AnyInvokeParams& primitive_parameters) {
             decltype(auto) data_ctx = primitive_parameters.CastTo<conv::DataInvokeParams>();
             const auto& tensors     = data_ctx.tensors;

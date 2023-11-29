@@ -123,8 +123,8 @@ void ReorderTensorGPUData(const Handle& handle,
                           const std::vector<size_t>& tensor_lens,
                           int reordering_dim,
                           const std::vector<size_t>& sample_order,
-                          std::vector<size_t> src_stride,
-                          std::vector<size_t> dst_stride,
+                          const std::vector<size_t>& src_stride,
+                          const std::vector<size_t>& dst_stride,
                           ConstData_t src,
                           Data_t dst,
                           miopenDataType_t data_type)
@@ -212,8 +212,8 @@ void RNNTensorBaseLayoutConverter::ReorderHiddenTensorGPUData(const Handle& hand
     if(lens[reordering_dim] != sample_order.size())
         MIOPEN_THROW(miopenStatusInternalError, "Wrong tensor lens");
 
-    const std::vector<size_t> src_stride = tensor_desc.GetStrides();
-    const std::vector<size_t> dst_stride = tensor_desc.GetStrides();
+    const std::vector<size_t>& src_stride = tensor_desc.GetStrides();
+    const std::vector<size_t>& dst_stride = tensor_desc.GetStrides();
 
     ReorderTensorGPUData(handle,
                          lens,
@@ -366,7 +366,7 @@ void RNNTensorBaseLayoutConverter::ChangePaddedTensorGPUDataLayout(
                      "Wrong tensor descriptor, Dst data type should match src data type.");
     }
 
-    const std::vector<size_t> copy_size = src_padded_desc.GetLengths();
+    const std::vector<size_t>& copy_size = src_padded_desc.GetLengths();
     if(dst_padded_desc.GetLengths() != copy_size)
     {
         MIOPEN_THROW(miopenStatusInternalError,

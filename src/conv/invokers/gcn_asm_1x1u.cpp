@@ -40,7 +40,7 @@ InvokerFactory MakeGcnAsm1x1UInvokerFactory(int N, int C, int H, int W, int K, i
         if(kernels.size() != 1)
             MIOPEN_THROW("Solver expects one kernel");
 
-        const auto kernel = kernels[0];
+        const auto& kernel = kernels[0];
 
         return [=](const Handle& handle, const AnyInvokeParams& primitive_parameters) {
             const auto& params  = primitive_parameters.CastTo<DataInvokeParams>();

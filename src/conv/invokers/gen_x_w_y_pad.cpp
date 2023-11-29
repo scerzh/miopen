@@ -40,7 +40,7 @@ Invoker MakeGenericXWYPadInvoker(const std::vector<Kernel>& kernels)
     if(kernels.size() != 1)
         MIOPEN_THROW("Expected a single kernel.");
 
-    const auto kernel = kernels[0];
+    const auto& kernel = kernels[0];
 
     return [kernel](const Handle& handle, const AnyInvokeParams& primitive_parameters) {
         const auto& params  = primitive_parameters.CastTo<DataInvokeParams>();

@@ -81,7 +81,7 @@ static inline float CallImplicitGemmWrwDynamic(const miopen::Handle& handle,
 {
     float elapsed = 0.0f;
 
-    auto kernel = kernels[0];
+    const auto& kernel = kernels[0];
     // clang-format off
     int hi           = problem.GetOutHeight_();
     int wi           = problem.GetOutWidth_();
@@ -142,7 +142,7 @@ static inline float CallImplicitGemmWrwDynamic(const miopen::Handle& handle,
     // reduction section
     if(gemmk_groups > 0)
     {
-        auto kernel_reduction = kernels[1];
+        const auto& kernel_reduction = kernels[1];
         int reduction_groups  = 1 << gemmk_groups;
         MIOPEN_LOG_I(kernel_reduction.GetName() << " with groups: " << reduction_groups);
         std::vector<OpKernelArg> opArgs_reduction;

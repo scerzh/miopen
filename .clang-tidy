@@ -30,7 +30,6 @@
 #   -google-readability-casting
 #   -hicpp-use-emplace
 #   -modernize-use-emplace
-#   -performance-unnecessary-copy-initialization
 #   -readability-container-data-pointer
 #
 # TODO Code Quality WORKAROUND ROCm 5.3 && Ubuntu 22.04 && C++17 && cppcheck 2.9 update
@@ -155,7 +154,6 @@ Checks: >-
   -modernize-concat-nested-namespaces,
   -modernize-unary-static-assert,
   -performance-no-automatic-move,
-  -performance-unnecessary-copy-initialization,
   -performance-unnecessary-value-param,
   -readability-avoid-unconditional-preprocessor-if,
   -readability-container-data-pointer,

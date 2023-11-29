@@ -410,7 +410,7 @@ auto GenericSearch(const Solver s,
         }
         else
         {
-            const auto id = s.SolverDbId();
+            const auto& id = s.SolverDbId();
             MIOPEN_THROW("Generic search has failed. Solver " + id +
                          " cannot produce any valid configuration.");
         }

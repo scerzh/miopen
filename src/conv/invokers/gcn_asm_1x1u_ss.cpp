@@ -39,8 +39,8 @@ InvokerFactory MakeGcnAsm1x1USSInvokerFactory(
     int N, int C, int K, int n_groups, int out_H, int out_W, std::size_t workspace_sz)
 {
     return [=](const std::vector<Kernel>& kernels) {
-        const auto ss_kernel = kernels[0];
-        const auto kernel    = kernels[1];
+        const auto& ss_kernel = kernels[0];
+        const auto& kernel    = kernels[1];
 
         return [=](const Handle& handle, const AnyInvokeParams& primitive_parameters) {
             const auto& params        = primitive_parameters.CastTo<DataInvokeParams>();

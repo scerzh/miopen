@@ -1023,7 +1023,7 @@ miopenRNNBaseLayout_t RNNDescriptor::getBaseLayoutFromDataTensor(const SeqTensor
     std::initializer_list<miopenRNNBaseLayout_t> base_layouts = {
         miopenRNNDataBatchMajorPadded, miopenRNNDataSeqMajorNotPadded, miopenRNNDataSeqMajorPadded};
 
-    const std::vector<unsigned> desc_dim_order = desc.GetLayoutVector();
+    const std::vector<unsigned>& desc_dim_order = desc.GetLayoutVector();
     bool desc_seq_is_padded                    = desc.IsPaddedSeqLayout();
 
     if(desc_dim_order.size() == 3)

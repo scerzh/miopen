@@ -196,7 +196,7 @@ struct UniversalTransposeSolver : TransposePseudoSolver
         }
 
         sln.invoker_factory = [](const std::vector<Kernel>& kernels) {
-            const auto kernel = kernels.front();
+            const auto& kernel = kernels.front();
             return [kernel](const Handle& handle, const AnyInvokeParams& any_params) {
                 const auto& params      = any_params.CastTo<TransposeInvokeParams>();
                 const auto& lens        = GetNCDHW<uint64_t>(params.in_desc.GetLengths());

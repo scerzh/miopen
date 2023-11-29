@@ -166,7 +166,7 @@ ConvSolution ActivBwdSolver0::GetSolution(const ExecutionContext&,
     }
 
     result.invoker_factory = [=](const std::vector<Kernel>& kernels) {
-        const auto kernel_handle = kernels.front();
+        const auto& kernel_handle = kernels.front();
 
         return [=](const Handle& handle, const AnyInvokeParams& raw_params) {
             decltype(auto) kernel = handle.Run(kernel_handle);

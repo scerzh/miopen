@@ -145,7 +145,7 @@ ConvSolution ConvDirectNaiveConvFwd::GetSolution(const ExecutionContext& ctx,
     if(problem.Is2d())
     {
         result.invoker_factory = [=](const std::vector<Kernel>& kernels) {
-            const auto kern = kernels[0];
+            const auto& kern = kernels[0];
             return [=](const Handle& handle, const AnyInvokeParams& primitive_parameters) {
                 decltype(auto) data_ctx =
                     primitive_parameters.CastTo<miopen::conv::DataInvokeParams>();
@@ -228,7 +228,7 @@ ConvSolution ConvDirectNaiveConvFwd::GetSolution(const ExecutionContext& ctx,
     else
     {
         result.invoker_factory = [=](const std::vector<Kernel>& kernels) {
-            const auto kern = kernels[0];
+            const auto& kern = kernels[0];
             return [=](const Handle& handle, const AnyInvokeParams& primitive_parameters) {
                 decltype(auto) data_ctx =
                     primitive_parameters.CastTo<miopen::conv::DataInvokeParams>();
