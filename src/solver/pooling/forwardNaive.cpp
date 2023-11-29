@@ -92,8 +92,8 @@ PoolingForwardNaive::GetSolution(const ExecutionContext& context,
 {
     auto result = ConvSolution{miopenStatusSuccess};
 
-    const auto& bot  = problem.GetXDesc();
-    const auto& top  = problem.GetYDesc();
+    const auto& bot = problem.GetXDesc();
+    const auto& top = problem.GetYDesc();
     const bool is2d = (bot.GetSize() == 4);
 
     // To compact code:

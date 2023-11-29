@@ -525,7 +525,7 @@ Program Handle::LoadProgram(const std::string& program_name,
         {
             // The target name has target ID in there, fall back on the generic code object
             const auto& base_arch = arch_target_id.at(0);
-            hsaco                = miopen::LoadBinary(this->GetTargetProperties(),
+            hsaco                 = miopen::LoadBinary(this->GetTargetProperties(),
                                        this->GetMaxComputeUnits(),
                                        program_name,
                                        orig_params + " -mcpu=" + base_arch,

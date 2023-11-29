@@ -143,7 +143,7 @@ static inline float CallImplicitGemmWrwDynamic(const miopen::Handle& handle,
     if(gemmk_groups > 0)
     {
         const auto& kernel_reduction = kernels[1];
-        int reduction_groups  = 1 << gemmk_groups;
+        int reduction_groups         = 1 << gemmk_groups;
         MIOPEN_LOG_I(kernel_reduction.GetName() << " with groups: " << reduction_groups);
         std::vector<OpKernelArg> opArgs_reduction;
         int reduction_per_thread = 4;
