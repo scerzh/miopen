@@ -193,6 +193,84 @@ void BackendRngDescriptor::getAttribute(miopenBackendAttributeName_t attributeNa
     }
 }
 
+std::vector<Tensor*> OperationRng::getInTensors() const
+{
+    if(mSeed.index() == 0)
+    {
+        return {mOffset};
+    }
+    else
+    {
+        return {std::get<Tensor*>(mSeed), mOffset};
+    }
+}
+
+std::vector<Tensor*> OperationRng::getOutTensors() const { return {mOutput}; }
+
+OperationRngBuilder& OperationRngBuilder::setRng(Rng* rng)
+{
+    if(rng != nullptr)
+    {
+        mOperationRng.mRng = rng;
+    }
+    else
+    {
+        MIOPEN_THROW(miopenStatusBadParm);
+    }
+}
+
+OperationRngBuilder& OperationRngBuilder::setOutput(Tensor* output)
+{
+    if(output != nullptr)
+    {
+        mOperationRng.mOutput = output;
+    }
+    else
+    {
+        MIOPEN_THROW(miopenStatusBadParm);
+    }
+}
+
+OperationRngBuilder& OperationRngBuilder::setSeed(int64_t seed) noexcept
+{
+    mOperationRng.mSeed = seed;
+}
+
+OperationRngBuilder& OperationRngBuilder::setSeed(Tensor* seed)
+{
+    if(seed != nullptr)
+    {
+        mOperationRng.mSeed = seed;
+    }
+    else
+    {
+        MIOPEN_THROW(miopenStatusBadParm);
+    }
+}
+
+OperationRngBuilder& OperationRngBuilder::setOffset(Tensor* offset)
+{
+    if(offset != nullptr)
+    {
+        mOperationRng.mOffset = offset;
+    }
+    else
+    {
+        MIOPEN_THROW(miopenStatusBadParm);
+    }
+}
+
+OperationRng OperationRngBuilder::build()
+{
+    if(mOperationRng.mRng == nullptr || mOperationRng.mOutput == nullptr ||
+       mOperationRng.mOffset == nullptr)
+    {
+        MIOPEN_THROW(miopenStatusBadParm);
+    }
+
+    return mOperationRng;
+}
+
 } // namespace graphapi
 
 } // namespace miopen
