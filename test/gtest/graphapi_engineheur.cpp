@@ -36,5 +36,6 @@ namespace {
 using miopen::graphapi::EngineHeur;
 using miopen::graphapi::EngineHeurBuilder;
 using miopen::graphapi::OpGraph;
+using miopen::graphapi::EngineCfg;
 
 }
